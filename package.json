@@ -1,12 +1,31 @@
 {
   "name": "electron-acrylic-window",
   "version": "0.0.1",
+  "description": "Add vibrancy effect for electron",
   "main": "index.js",
+  "keywords": [
+    "node",
+    "vibrancy",
+    "napi",
+    "windows",
+    "vibrant",
+    "acrylic"
+  ],
   "scripts": {
     "build": "node-gyp build",
-    "install": "node-gyp rebuild",
-    "start": "node ./index.js"
+    "install": "node-gyp rebuild"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/04SeoHyun/electron-acrylic-window.git"
+  },
+  "author": "Seo_Hyun <04seohyun@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/04SeoHyun/electron-acrylic-window/issues",
+    "email": "04seohyun@gmail.com"
+  },
+  "homepage": "https://github.com/04SeoHyun/electron-acrylic-window#readme",
   "gypfile": true,
   "dependencies": {
     "bindings": "^1.5.0",
