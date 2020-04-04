@@ -25,6 +25,8 @@ There is no return value. If it fails to set vibrancy, it throws error.
 Errors
 * WINDOW_NOT_GIVEN  
 Error that occurs when ```win``` parameter is not passed
+* NOT_VALID_WINDOW   
+Error that occurs when ```win``` parameter is not valid Electron window
 * UNKNOWN  
 Unknown error.
 
@@ -38,5 +40,7 @@ There is no return value. If it fails to set vibrancy, it throws error.
 Errors
 * WINDOW_NOT_GIVEN  
 Error that occurs when ```win``` parameter is not passed
+* NOT_VALID_WINDOW   
+Error that occurs when ```win``` parameter is not valid Electron window
 * UNKNOWN  
 Unknown error.

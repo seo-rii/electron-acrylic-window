@@ -12,3 +12,6 @@ branches:
 
 install:
   - npm install
+
+script:
+  - node index.js
