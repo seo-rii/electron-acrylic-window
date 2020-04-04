@@ -1,4 +1,6 @@
 # electron-acrylic-window
+
+<img alt="logo" src="./logo.png" width="300"> 
   
 [![Build Status](https://travis-ci.org/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.org/04seohyun/electron-acrylic-window)  
   
