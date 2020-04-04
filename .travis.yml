@@ -1,0 +1,14 @@
+# .travis.yml
+language: node_js
+
+node_js:
+  - "lts/*"
+
+os: windows
+
+branches:
+  only:
+    - master
+
+install:
+  - npm install
