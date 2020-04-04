@@ -1,6 +1,6 @@
 # electron-acrylic-window
   
-[![Build Status](https://travis-ci.org/electron-acrylic-window/Timer.svg?branch=master)](https://travis-ci.org/electron-acrylic-window/Timer)  
+[![Build Status](https://travis-ci.org/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.org/04seohyun/electron-acrylic-window)  
   
 Simply add vibrancy effect to Electron application on Windows.
 
