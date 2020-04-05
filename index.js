@@ -23,7 +23,7 @@ function setVibrancy(win) {
 
 function disableVibrancy(win) {
     if (process.platform !== 'win32') throw new Error('NOT_MATCHING_PLATFORM');
-    wrapper.setVibrancy(getHwnd(win));
+    wrapper.disableVibrancy(getHwnd(win));
 }
 
 exports.setVibrancy = setVibrancy;

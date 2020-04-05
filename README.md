@@ -31,6 +31,8 @@ Error that occurs when os is not Windows 10.
 Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
 Error that occurs when ```win``` parameter is not valid Electron window.
+* FAIL_LOAD_DLL  
+Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
 * UNKNOWN  
 Unknown error.
 

@@ -1,12 +1,40 @@
 #include <napi.h>
-#include <assert.h>
 #include <dwmapi.h>
 #include <VersionHelpers.h>
+
+enum AccentState {
+    ACCENT_DISABLED = 0,
+    ACCENT_ENABLE_GRADIENT = 1,
+    ACCENT_ENABLE_TRANSPARENTGRADIENT = 2,
+    ACCENT_ENABLE_BLURBEHIND = 3,
+    ACCENT_INVALID_STATE = 4
+};
+
+enum WindowCompositionAttribute {
+    WCA_ACCENT_POLICY = 19
+};
+
+struct AccentPolicy {
+    AccentState accentState;
+    int accentFlags;
+    int gradientColor;
+    int animationId;
+};
+
+struct WindowCompositionAttributeData {
+    WindowCompositionAttribute attribute;
+    PVOID pData;
+    ULONG dataSize;
+};
+
+typedef BOOL(WINAPI *pSetWindowCompositionAttribute)(HWND, WindowCompositionAttributeData*);
+
+const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
 
 void setVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     if (!IsWindows10OrGreater()) {
-        Napi::TypeError::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
         return;
     }
     if (info.Length() < 1) {
@@ -17,13 +45,29 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
         return;
     }
-    HWND hwnd = (HWND) info[0].As<Napi::Number>().Int64Value();
+    HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
+    if (hModule) {
+        const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
+                hModule, "SetWindowCompositionAttribute");
+        if (SetWindowCompositionAttribute) {
+            AccentPolicy policy = {ACCENT_ENABLE_BLURBEHIND, 2, 0, 0};
+            WindowCompositionAttributeData data = {WCA_ACCENT_POLICY, &policy, sizeof(AccentPolicy)};
+            SetWindowCompositionAttribute(hWnd, &data);
+        } else {
+            Napi::Error::New(env, "FAIL_LOAD_DLL").ThrowAsJavaScriptException();
+            return;
+        }
+        FreeLibrary(hModule);
+    } else {
+        Napi::Error::New(env, "FAIL_LOAD_DLL").ThrowAsJavaScriptException();
+        return;
+    }
 }
 
 void disableVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     if (!IsWindows10OrGreater()) {
-        Napi::TypeError::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
+        Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
         return;
     }
     if (info.Length() < 1) {
@@ -34,7 +78,23 @@ void disableVibrancy(const Napi::CallbackInfo &info) {
         Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
         return;
     }
-    HWND hwnd = (HWND) info[0].As<Napi::Number>().Int64Value();
+    HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
+    if (hModule) {
+        const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
+                hModule, "SetWindowCompositionAttribute");
+        if (SetWindowCompositionAttribute) {
+            AccentPolicy policy = {ACCENT_DISABLED, 0, 0, 0};
+            WindowCompositionAttributeData data = {WCA_ACCENT_POLICY, &policy, sizeof(AccentPolicy)};
+            SetWindowCompositionAttribute(hWnd, &data);
+        } else {
+            Napi::Error::New(env, "FAIL_LOAD_DLL").ThrowAsJavaScriptException();
+            return;
+        }
+        FreeLibrary(hModule);
+    } else {
+        Napi::Error::New(env, "FAIL_LOAD_DLL").ThrowAsJavaScriptException();
+        return;
+    }
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
@@ -45,5 +105,5 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     return exports;
 }
 
-NODE_API_MODULE(hello, Init
+NODE_API_MODULE(vibrancy, Init
 )
