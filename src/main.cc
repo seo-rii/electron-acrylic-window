@@ -1,9 +1,14 @@
 #include <napi.h>
 #include <assert.h>
 #include <dwmapi.h>
+#include <VersionHelpers.h>
 
 void setVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
+    if (!IsWindows10OrGreater()) {
+        Napi::TypeError::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
+        return;
+    }
     if (info.Length() < 1) {
         Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
         return;
@@ -17,6 +22,10 @@ void setVibrancy(const Napi::CallbackInfo &info) {
 
 void disableVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
+    if (!IsWindows10OrGreater()) {
+        Napi::TypeError::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
+        return;
+    }
     if (info.Length() < 1) {
         Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
         return;
@@ -36,4 +45,5 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     return exports;
 }
 
-NODE_API_MODULE(hello, Init)
+NODE_API_MODULE(hello, Init
+)

@@ -25,10 +25,12 @@ Enables Vibrancy to window.
 There is no return value. If it fails to set vibrancy, it throws error.
 
 Errors
+* NOT_MATCHING_PLATFORM  
+Error that occurs when os is not Windows 10.
 * WINDOW_NOT_GIVEN  
-Error that occurs when ```win``` parameter is not passed
+Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
-Error that occurs when ```win``` parameter is not valid Electron window
+Error that occurs when ```win``` parameter is not valid Electron window.
 * UNKNOWN  
 Unknown error.
 
@@ -40,9 +42,11 @@ Disables Vibrancy to window.
 There is no return value. If it fails to set vibrancy, it throws error.
 
 Errors
+* NOT_MATCHING_PLATFORM  
+Error that occurs when os is not Windows 10.
 * WINDOW_NOT_GIVEN  
-Error that occurs when ```win``` parameter is not passed
+Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
-Error that occurs when ```win``` parameter is not valid Electron window
+Error that occurs when ```win``` parameter is not valid Electron window.
 * UNKNOWN  
 Unknown error.

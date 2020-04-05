@@ -17,10 +17,12 @@ function getHwnd(win) {
 
 
 function setVibrancy(win) {
+    if (process.platform !== 'win32') throw new Error('NOT_MATCHING_PLATFORM');
     wrapper.setVibrancy(getHwnd(win));
 }
 
 function disableVibrancy(win) {
+    if (process.platform !== 'win32') throw new Error('NOT_MATCHING_PLATFORM');
     wrapper.setVibrancy(getHwnd(win));
 }
 
