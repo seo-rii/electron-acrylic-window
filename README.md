@@ -16,13 +16,17 @@ Inspired from ```electron-vibrancy```.
 npm i electron-acrylic-window
 ```
 
+## Screenshots
+![Screenshot1](./screenshots/1.png)
+
 ## Usage
 ### setVibrancy
 ```javascript
 setVibrancy(win);
 ```
 Enables Vibrancy to window.  
-There is no return value. If it fails to set vibrancy, it throws error.
+There is no return value. If it fails to set vibrancy, it throws error.  
+```win``` should be frameLess, and transparent.
 
 Errors
 * NOT_MATCHING_PLATFORM  
@@ -41,7 +45,8 @@ Unknown error.
 disableVibrancy(win);
 ```
 Disables Vibrancy to window.  
-There is no return value. If it fails to set vibrancy, it throws error.
+There is no return value. If it fails to disable vibrancy, it throws error.  
+```win``` should be frameLess, and transparent.
 
 Errors
 * NOT_MATCHING_PLATFORM  
@@ -53,8 +58,6 @@ Error that occurs when ```win``` parameter is not valid Electron window.
 * UNKNOWN  
 Unknown error.
 
-## Screenshots
-![Screenshot1](./screenshots/1.png)
 
 ## Example
 ```javascript
