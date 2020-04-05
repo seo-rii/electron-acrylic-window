@@ -2,8 +2,10 @@
 
 <img alt="logo" src="./logo.png" width="300"> 
   
-[![Build Status](https://travis-ci.org/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.org/04seohyun/electron-acrylic-window)  
-  
+[![Build Status](https://travis-ci.org/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.org/04seohyun/electron-acrylic-window)
+[![Dependencies](https://david-dm.org/04seohyun/electron-acrylic-window.svg)](https://david-dm.org/04seohyun/electron-acrylic-window) 
+[![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)  
+
 Simply add vibrancy effect to Electron application on Windows.
 
 Works only on Windows 10.
@@ -13,7 +15,7 @@ Inspired from ```electron-vibrancy```.
 ## Download
 
 ```shell script
-npm i electron-acrylic-window
+npm i electron-acrylic-window --save
 ```
 
 ## Screenshots
