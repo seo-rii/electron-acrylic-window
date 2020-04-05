@@ -37,7 +37,7 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
         return;
     }
-    if (info.Length() < 1) {
+    if (info.Length() != 1) {
         Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
         return;
     }
@@ -45,7 +45,7 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
         return;
     }
-    HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
+    HWND hWnd = (HWND) info[0].As<Napi::Number>().Int32Value();
     if (hModule) {
         const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
                 hModule, "SetWindowCompositionAttribute");
@@ -70,7 +70,7 @@ void disableVibrancy(const Napi::CallbackInfo &info) {
         Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
         return;
     }
-    if (info.Length() < 1) {
+    if (info.Length() != 1) {
         Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
         return;
     }
@@ -105,5 +105,4 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     return exports;
 }
 
-NODE_API_MODULE(vibrancy, Init
-)
+NODE_API_MODULE(vibrancy, Init)
