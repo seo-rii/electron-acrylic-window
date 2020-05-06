@@ -1,5 +1,11 @@
-const wrapper = require('bindings')('vibrancy-wrapper');
+const {wSetVibrancy, wDisalbeVibrancy} = {setVibrancy, disableVibrancy} = require('bindings')('vibrancy-wrapper');
 const os = require("os");
+const eBrowserWindow = require('electron').BrowserWindow;
+
+function isWindows10() {
+    if (process.platform !== 'win32') return false;
+    return os.release().split('.')[0] === '10';
+}
 
 function getHwnd(win) {
     if (!win) throw new TypeError('WINDOW_NOT_GIVEN');
@@ -15,16 +21,31 @@ function getHwnd(win) {
     }
 }
 
+class vBrowserWindow extends eBrowserWindow {
+    constructor(props) {
+        super(props);
+        if (isWindows10() && props.hasOwnProperty('vibrancy')) wSetVibrancy(getHwnd(this));
+    }
 
-function setVibrancy(win) {
-    if (process.platform !== 'win32') throw new Error('NOT_MATCHING_PLATFORM');
-    wrapper.setVibrancy(getHwnd(win));
+    setVibrancy(type = null) {
+        if (!isWindows10()) super.setVibrancy(type);
+        else {
+            if (type) wSetVibrancy(getHwnd(this));
+            else wDisalbeVibrancy.disableVibrancy(getHwnd(this));
+        }
+    }
+}
+
+function setVibrancy(win, op = null) {
+    if (!isWindows10()) win.setVibrancy(op);
+    else wSetVibrancy(getHwnd(win));
 }
 
 function disableVibrancy(win) {
-    if (process.platform !== 'win32') throw new Error('NOT_MATCHING_PLATFORM');
-    wrapper.disableVibrancy(getHwnd(win));
+    if (!isWindows10()) win.setVibrancy(null);
+    else wDisalbeVibrancy(getHwnd(win));
 }
 
 exports.setVibrancy = setVibrancy;
 exports.disableVibrancy = disableVibrancy;
+exports.BrowserWindow = vBrowserWindow;

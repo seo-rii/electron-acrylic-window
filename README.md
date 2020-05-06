@@ -1,6 +1,6 @@
 # electron-acrylic-window
 
-<img alt="logo" src="./logo.png" width="300"> 
+<img alt="logo" src="./logo.png" width="250"> 
   
 [![Build Status](https://travis-ci.com/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.com/04seohyun/electron-acrylic-window)
 [![Dependencies](https://david-dm.org/04seohyun/electron-acrylic-window.svg)](https://david-dm.org/04seohyun/electron-acrylic-window) 
@@ -8,11 +8,13 @@
 
 Simply add vibrancy effect to Electron application on Windows.
 
-Works only on Windows 10.
+Works only on Windows 10. If os is not Windows 10, it will call original function.  
 
 Inspired from ```electron-vibrancy```.
 
 ## Download
+
+You should install Visual studio or Visual C++ build tools before install this.
 
 ```shell script
 npm i electron-acrylic-window --save
@@ -22,17 +24,22 @@ npm i electron-acrylic-window --save
 ![Screenshot1](./screenshots/1.png)
 
 ## Usage
+### BrowserWindow
+Wrapper class for ```BrowserWindow```.  
+
+If OS is not Windows 10, it works perfectly the same.  
+
+If OS is Windows 10, it overrides construtor option and ```setVibrancy``` method to work properly on Windows 10.
 ### setVibrancy
 ```javascript
-setVibrancy(win);
+setVibrancy(win, op = null);
 ```
 Enables Vibrancy to window.  
 There is no return value. If it fails to set vibrancy, it throws error.  
-```win``` should be frameLess, and transparent.
+```win``` should be frameLess, and transparent.  
+This function will call ```win.setVibrancy(op)``` if os is not Windows 10.  
 
-Errors
-* NOT_MATCHING_PLATFORM  
-Error that occurs when os is not Windows 10.
+#### Errors
 * WINDOW_NOT_GIVEN  
 Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
@@ -49,10 +56,9 @@ disableVibrancy(win);
 Disables Vibrancy to window.  
 There is no return value. If it fails to disable vibrancy, it throws error.  
 ```win``` should be frameLess, and transparent.
+This function will call ```win.setVibrancy(null)``` if os is not Windows 10.  
 
-Errors
-* NOT_MATCHING_PLATFORM  
-Error that occurs when os is not Windows 10.
+#### Errors
 * WINDOW_NOT_GIVEN  
 Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
@@ -63,8 +69,8 @@ Unknown error.
 
 ## Example
 ```javascript
-const vibrancy = require('electron-acrylic-window');
-const {app, BrowserWindow} = require('electron');
+const {BrowserWindow} = require('electron-acrylic-window');
+const {app} = require('electron');
 
 let win;
 
@@ -73,10 +79,13 @@ function createWindow() {
         width: 800,
         height: 600,
         frame: false,
-        transparent: true
+        transparent: true,
+        vibrancy: 'light'
     });
     win.loadURL(`file://${__dirname}/index.html`);
-    vibrancy.setVibrancy(win);
+    setTimeout(()=>{
+        win.setVibrancy();
+    }, 3000);
 }
 
 app.on('ready', createWindow);
