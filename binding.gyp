@@ -2,8 +2,12 @@
   "targets": [
     {
       "target_name": "vibrancy-wrapper",
-      "sources": [
-        "src/main.cc"
+      "conditions":[
+        ["OS=='win'", {
+          "sources": [
+            "src/main.cc"
+          ]
+        }]
       ],
       "cflags": [
         "-O3"

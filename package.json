@@ -1,6 +1,6 @@
 {
   "name": "electron-acrylic-window",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Add vibrancy effect for electron",
   "main": "index.js",
   "keywords": [
@@ -15,10 +15,8 @@
     "blur"
   ],
   "scripts": {
-    "build": "run-script-os",
-    "install": "run-script-os",
-    "build:win32": "node-gyp build",
-    "install:win32": "node-gyp build"
+    "build": "node-gyp rebuild",
+    "install": "node-gyp rebuild"
   },
   "repository": {
     "type": "git",
@@ -38,7 +36,6 @@
     "node-addon-api": "^3.0.0"
   },
   "devDependencies": {
-    "electron": "^8.2.5",
-    "run-script-os": "^1.1.1"
+    "electron": "^8.2.5"
   }
 }

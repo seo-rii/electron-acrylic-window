@@ -5,5 +5,4 @@ node_modules/
 .gitignore
 .travis.yml
 logo.png
-package-lock.json
 screenshots/
