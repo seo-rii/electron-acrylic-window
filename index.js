@@ -1,4 +1,4 @@
-const {setVibrancy: wSetVibrancy, disalbeVibrancy: wDisalbeVibrancy} = require('bindings')('vibrancy-wrapper');
+const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require('bindings')('vibrancy-wrapper');
 const os = require("os");
 const eBrowserWindow = require('electron').BrowserWindow;
 
@@ -31,7 +31,7 @@ class vBrowserWindow extends eBrowserWindow {
         if (!isWindows10()) super.setVibrancy(type);
         else {
             if (type) wSetVibrancy(getHwnd(this));
-            else wDisalbeVibrancy.disableVibrancy(getHwnd(this));
+            else wDisableVibrancy(getHwnd(this));
         }
     }
 }
@@ -43,7 +43,7 @@ function setVibrancy(win, op = null) {
 
 function disableVibrancy(win) {
     if (!isWindows10()) win.setVibrancy(null);
-    else wDisalbeVibrancy(getHwnd(win));
+    else wDisableVibrancy(getHwnd(win));
 }
 
 exports.setVibrancy = setVibrancy;
