@@ -1,6 +1,6 @@
 {
   "name": "electron-acrylic-window",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Add vibrancy effect for electron",
   "main": "index.js",
   "keywords": [

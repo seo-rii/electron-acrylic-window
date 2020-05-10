@@ -1,7 +1,4 @@
-const {wSetVibrancy, wDisalbeVibrancy} = {
-    setVibrancy,
-    disableVibrancy
-} = require('bindings')('vibrancy-wrapper');
+const {setVibrancy: wSetVibrancy, disalbeVibrancy: wDisalbeVibrancy} = require('bindings')('vibrancy-wrapper');
 const os = require("os");
 const eBrowserWindow = require('electron').BrowserWindow;
 
