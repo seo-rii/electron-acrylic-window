@@ -38,7 +38,6 @@ class vBrowserWindow extends eBrowserWindow {
                 if (nativeTheme.shouldUseDarkColors) op = 'dark';
                 else op = 'light';
             }
-            console.log(op === 'light' ? 0 : 1);
             if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1);
             else wDisableVibrancy(getHwnd(this));
         }

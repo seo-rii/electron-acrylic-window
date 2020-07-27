@@ -38,6 +38,8 @@ Enables Vibrancy to window.
 There is no return value. If it fails to set vibrancy, it throws error.  
 ```win``` should be frameLess, and transparent.  
 This function will call ```win.setVibrancy(op)``` if os is not Windows 10.  
+On Windows 10, op should be 'light', 'dark', or 'appearance-based'.  
+If not, it'll set as 'appearance-based'.
 
 #### Errors
 * WINDOW_NOT_GIVEN  
@@ -67,27 +69,5 @@ Error that occurs when ```win``` parameter is not valid Electron window.
 Unknown error.
 
 
-## Example
-```javascript
-const {BrowserWindow} = require('electron-acrylic-window');
-const {app} = require('electron');
-
-let win;
-
-function createWindow() {
-    win = new BrowserWindow({
-        width: 800,
-        height: 600,
-        frame: false,
-        transparent: true,
-        vibrancy: 'light'
-    });
-    win.loadURL(`file://${__dirname}/index.html`);
-    setTimeout(()=>{
-        win.setVibrancy();
-    }, 3000);
-}
-
-app.on('ready', createWindow);
-
-```
+## Demo
+Clone this Repository and run ```npm run-script test```.

@@ -15,9 +15,6 @@ function createWindow() {
     setTimeout(() => {
         win.setVibrancy('dark');
     }, 3000);
-    setTimeout(() => {
-        win.setVibrancy();
-    }, 6000);
 }
 
 app.on('ready', createWindow);
