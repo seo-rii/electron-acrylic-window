@@ -1,6 +1,6 @@
 {
   "name": "electron-acrylic-window",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Add vibrancy effect for electron",
   "main": "index.js",
   "keywords": [
@@ -12,30 +12,32 @@
     "acrylic",
     "win10",
     "windows10",
-    "blur"
+    "blur",
+    "fluent"
   ],
   "scripts": {
     "build": "node-gyp rebuild",
-    "install": "node-gyp rebuild"
+    "install": "node-gyp rebuild",
+    "test": "npm run-script build && electron test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/04SeoHyun/electron-acrylic-window.git"
+    "url": "git+https://github.com/Seo-Rii/electron-acrylic-window.git"
   },
-  "author": "Seo_Hyun <04seohyun@gmail.com>",
+  "author": "seorii <studioSeoRii@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/04SeoHyun/electron-acrylic-window/issues",
-    "email": "04seohyun@gmail.com"
+    "url": "https://github.com/Seo-Rii/electron-acrylic-window/issues",
+    "email": "studioSeoRii@gmail.com"
   },
-  "homepage": "https://github.com/04SeoHyun/electron-acrylic-window#readme",
+  "homepage": "https://github.com/Seo-Rii/electron-acrylic-window#readme",
   "gypfile": true,
   "dependencies": {
     "bindings": "^1.5.0",
-    "node-gyp": "^6.1.0",
+    "node-gyp": "^7.0.0",
     "node-addon-api": "^3.0.0"
   },
   "devDependencies": {
-    "electron": "^8.2.5"
+    "electron": "^9.1.1"
   }
 }

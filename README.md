@@ -2,8 +2,8 @@
 
 <img alt="logo" src="./logo.png" width="250"> 
   
-[![Build Status](https://travis-ci.com/04seohyun/electron-acrylic-window.svg?branch=master)](https://travis-ci.com/04seohyun/electron-acrylic-window)
-[![Dependencies](https://david-dm.org/04seohyun/electron-acrylic-window.svg)](https://david-dm.org/04seohyun/electron-acrylic-window) 
+[![Build Status](https://travis-ci.com/seo-rii/electron-acrylic-window.svg?branch=master)](https://travis-ci.com/seo-rii/electron-acrylic-window)
+[![Dependencies](https://david-dm.org/seo-rii/electron-acrylic-window.svg)](https://david-dm.org/seo-rii/electron-acrylic-window) 
 [![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)  
 
 Simply add vibrancy effect to Electron application on Windows.

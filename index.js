@@ -1,6 +1,8 @@
-const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require('bindings')('vibrancy-wrapper');
+const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require("bindings")("vibrancy-wrapper");
 const os = require("os");
-const eBrowserWindow = require('electron').BrowserWindow;
+const eBrowserWindow = require("electron").BrowserWindow;
+const {nativeTheme} = require("electron");
+const supportedType = ['light', 'dark', 'appearance-based'];
 
 function isWindows10() {
     if (process.platform !== 'win32') return false;
@@ -24,26 +26,41 @@ function getHwnd(win) {
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
         super(props);
-        if (isWindows10() && props.hasOwnProperty('vibrancy')) wSetVibrancy(getHwnd(this));
+        if (isWindows10() && props.hasOwnProperty('vibrancy')) this.setVibrancy(props.vibrancy);
     }
 
-    setVibrancy(type = null) {
-        if (!isWindows10()) super.setVibrancy(type);
+    setVibrancy(op = null) {
+        if (op) this.setVibrancy(null);
+        if (!isWindows10()) super.setVibrancy(op);
         else {
-            if (type) wSetVibrancy(getHwnd(this));
+            if (!op in supportedType) op = 'appearance-based';
+            if (op === 'appearance-based') {
+                if (nativeTheme.shouldUseDarkColors) op = 'dark';
+                else op = 'light';
+            }
+            console.log(op === 'light' ? 0 : 1);
+            if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1);
             else wDisableVibrancy(getHwnd(this));
         }
     }
 }
 
-function setVibrancy(win, op = null) {
+function setVibrancy(win, op = 'appearance-based') {
+    if (op) setVibrancy(win, null);
     if (!isWindows10()) win.setVibrancy(op);
-    else wSetVibrancy(getHwnd(win));
+    else {
+        if (!op in supportedType) op = 'appearance-based';
+        if (op === 'appearance-based') {
+            if (nativeTheme.shouldUseDarkColors) op = 'dark';
+            else op = 'light';
+        }
+        if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1);
+        else wDisableVibrancy(getHwnd(this));
+    }
 }
 
 function disableVibrancy(win) {
-    if (!isWindows10()) win.setVibrancy(null);
-    else wDisableVibrancy(getHwnd(win));
+    setVibrancy(win, null);
 }
 
 exports.setVibrancy = setVibrancy;
