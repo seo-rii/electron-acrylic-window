@@ -9,12 +9,9 @@ function createWindow() {
         height: 600,
         frame: false,
         transparent: true,
-        vibrancy: 'light'
+        vibrancy: 'dark'
     });
     win.loadURL(`file://${__dirname}/test.html`);
-    setTimeout(() => {
-        win.setVibrancy('dark');
-    }, 3000);
 }
 
 app.on('ready', createWindow);

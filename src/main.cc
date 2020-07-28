@@ -40,8 +40,12 @@ void setVibrancy(const Napi::CallbackInfo &info) {
             Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
             return;
         }
-        if (info.Length() != 2) {
+        if (info.Length() == 0) {
             Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
+            return;
+        }
+        if (info.Length() != 3) {
+            Napi::TypeError::New(env, "PARAMETER_ERROR").ThrowAsJavaScriptException();
             return;
         }
         if (!info[0].IsNumber()) {
@@ -50,6 +54,7 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         }
         HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
         int blurColor = info[1].As<Napi::Number>().Int32Value();
+        int isRS4OrGreater = info[2].As<Napi::Number>().Int32Value();
         if (hModule) {
             const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
                     hModule, "SetWindowCompositionAttribute");
@@ -58,7 +63,8 @@ void setVibrancy(const Napi::CallbackInfo &info) {
                 if (blurColor == 0) gradientColor = (1 << 24) | (0xFFFFFF & 0xFFFFFF);
                 else if (blurColor == 1) gradientColor = (1 << 24) | (0x990000 & 0xFFFFFF);
                 else Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
-                AccentPolicy policy = {ACCENT_ENABLE_ACRYLICBLURBEHIND, 2, gradientColor, 0};
+                AccentState blurType = isRS4OrGreater == 1 ? ACCENT_ENABLE_ACRYLICBLURBEHIND : ACCENT_ENABLE_BLURBEHIND;
+                AccentPolicy policy = {blurType, 2, gradientColor, 0};
                 WindowCompositionAttributeData data = {WCA_ACCENT_POLICY, &policy, sizeof(AccentPolicy)};
                 SetWindowCompositionAttribute(hWnd, &data);
             } else {

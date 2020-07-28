@@ -9,6 +9,11 @@ function isWindows10() {
     return os.release().split('.')[0] === '10';
 }
 
+function isRS4OrGreater() {
+    if (!isWindows10()) return false;
+    return !(os.release().split('.')[1] === '0' && parseInt(os.release().split('.')[2]) < 17134);
+}
+
 function getHwnd(win) {
     if (!win) throw new TypeError('WINDOW_NOT_GIVEN');
     try {
@@ -38,7 +43,7 @@ class vBrowserWindow extends eBrowserWindow {
                 if (nativeTheme.shouldUseDarkColors) op = 'dark';
                 else op = 'light';
             }
-            if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1);
+            if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1, isRS4OrGreater() ? 1 : 0);
             else wDisableVibrancy(getHwnd(this));
         }
     }
@@ -53,7 +58,7 @@ function setVibrancy(win, op = 'appearance-based') {
             if (nativeTheme.shouldUseDarkColors) op = 'dark';
             else op = 'light';
         }
-        if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1);
+        if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1, isRS4OrGreater() ? 1 : 0);
         else wDisableVibrancy(getHwnd(this));
     }
 }
