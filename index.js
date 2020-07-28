@@ -30,11 +30,13 @@ function getHwnd(win) {
 
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
-        super(props);
-        if (isWindows10() && props.hasOwnProperty('vibrancy')) this.setVibrancy(props.vibrancy);
+        const win = new eBrowserWindow(props);
+        vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
+        if (isWindows10() && props.hasOwnProperty('vibrancy')) win.setVibrancy(props.vibrancy);
+        return win;
     }
 
-    setVibrancy(op = null) {
+    static setVibrancy(op = null) {
         if (op) this.setVibrancy(null);
         if (!isWindows10()) super.setVibrancy(op);
         else {
@@ -46,6 +48,13 @@ class vBrowserWindow extends eBrowserWindow {
             if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1, isRS4OrGreater() ? 1 : 0);
             else wDisableVibrancy(getHwnd(this));
         }
+    }
+
+    static _bindAndReplace(object, method){
+        const boundFunction = method.bind(object);
+        Object.defineProperty(object, method.name, {
+            get: () => boundFunction
+        });
     }
 }
 

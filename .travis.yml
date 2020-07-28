@@ -11,4 +11,5 @@ branches:
     - master
 
 install:
+  - npm install electron -g
   - npm install
