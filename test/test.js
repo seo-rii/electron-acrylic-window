@@ -9,7 +9,9 @@ function createWindow() {
         height: 600,
         frame: false,
         transparent: true,
-        vibrancy: 'dark'
+        vibrancy: 'dark',
+        minWidth: 200,
+        minHeight: 200
     });
     win.loadURL(`file://${__dirname}/test.html`);
 }
