@@ -30,64 +30,71 @@ function getHwnd(win) {
 
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
+        props.backgroundColor = '#00000000';
+        props.show = false;
         const win = new eBrowserWindow(props);
         vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
-        if (isWindows10() && props.hasOwnProperty('vibrancy')) win.setVibrancy(props.vibrancy);
 
         // Replace window moving behavior to fix mouse polling rate bug
-        const pollingRate = 59.997 // TO-DO: Detect the current monitor's refresh rate
+        const pollingRate = 144;
         win.on('will-move', (e) => {
             e.preventDefault()
-        
-            // Track if the user is moving the window
-            if(win._moveTimeout) clearTimeout(win._moveTimeout);
-            win._moveTimeout = setTimeout(
-              () => {
-                win._isMoving = false
-                clearInterval(win._moveInterval)
-                win._moveInterval = null 
-              }, 1000/60)
-        
-            // Start new behavior if not already
-            if(!win._isMoving) {
-              win._isMoving = true
-              if(win._moveInterval) return false;
-    
-              // Get start positions
-              win._moveLastUpdate = 0
-              win._moveStartBounds = win.getBounds()
-              win._moveStartCursor = screen.getCursorScreenPoint()
-          
-              // Poll at 600hz while moving window
-              win._moveInterval = setInterval(() => {
-                const now = Date.now()
-                if(now >= win._moveLastUpdate + (1000/pollingRate)) {
-                  win._moveLastUpdate = now
-                  const cursor = screen.getCursorScreenPoint()
-          
-                  // Set new position
-                  win.setBounds({
-                    x: win._moveStartBounds.x + (cursor.x - win._moveStartCursor.x),
-                    y: win._moveStartBounds.y + (cursor.y - win._moveStartCursor.y),
-                    width: win._moveStartBounds.width,
-                    height: win._moveStartBounds.height
-                  })
-                }
-              }, 1000/600)
-            }
 
-          })
-        
-          // Replace window resizing behavior to fix mouse polling rate bug
-          win.on('will-resize', (e, newBounds) => {
+            // Track if the user is moving the window
+            if (win._moveTimeout) clearTimeout(win._moveTimeout);
+            win._moveTimeout = setTimeout(
+                () => {
+                    win._isMoving = false
+                    clearInterval(win._moveInterval)
+                    win._moveInterval = null
+                }, 1000 / 60)
+
+            // Start new behavior if not already
+            if (!win._isMoving) {
+                win._isMoving = true
+                if (win._moveInterval) return false;
+
+                // Get start positions
+                win._moveLastUpdate = 0
+                win._moveStartBounds = win.getBounds()
+                win._moveStartCursor = screen.getCursorScreenPoint()
+
+                // Poll at 600hz while moving window
+                win._moveInterval = setInterval(() => {
+                    const now = Date.now()
+                    if (now >= win._moveLastUpdate + (1000 / pollingRate)) {
+                        win._moveLastUpdate = now
+                        const cursor = screen.getCursorScreenPoint()
+
+                        // Set new position
+                        win.setBounds({
+                            x: win._moveStartBounds.x + (cursor.x - win._moveStartCursor.x),
+                            y: win._moveStartBounds.y + (cursor.y - win._moveStartCursor.y),
+                            width: win._moveStartBounds.width,
+                            height: win._moveStartBounds.height
+                        })
+                    }
+                }, 1000 / 600)
+            }
+        })
+
+        // Replace window resizing behavior to fix mouse polling rate bug
+        win.on('will-resize', (e, newBounds) => {
             const now = Date.now()
-            if(!win._resizeLastUpdate) win._resizeLastUpdate = 0;
-              if(now >= win._resizeLastUpdate + (1000/pollingRate)) {
+            if (!win._resizeLastUpdate) win._resizeLastUpdate = 0;
+            if (now >= win._resizeLastUpdate + (1000 / pollingRate)) {
                 win._resizeLastUpdate = now
-              } else {
+            } else {
                 e.preventDefault()
-              }
-          })
+            }
+        })
+
+        if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
+            setTimeout(() => {
+                win.show();
+                win.setVibrancy(props.vibrancy);
+            }, 100);
+        });
 
         return win;
     }
@@ -96,7 +103,7 @@ class vBrowserWindow extends eBrowserWindow {
         if (op) this.setVibrancy(null);
         if (!isWindows10()) super.setVibrancy(op);
         else {
-            if (!op in supportedType) op = 'appearance-based';
+            if (op && !(op in supportedType)) op = 'appearance-based';
             if (op === 'appearance-based') {
                 if (nativeTheme.shouldUseDarkColors) op = 'dark';
                 else op = 'light';
@@ -106,7 +113,7 @@ class vBrowserWindow extends eBrowserWindow {
         }
     }
 
-    static _bindAndReplace(object, method){
+    static _bindAndReplace(object, method) {
         const boundFunction = method.bind(object);
         Object.defineProperty(object, method.name, {
             get: () => boundFunction
@@ -118,7 +125,7 @@ function setVibrancy(win, op = 'appearance-based') {
     if (op) setVibrancy(win, null);
     if (!isWindows10()) win.setVibrancy(op);
     else {
-        if (!op in supportedType) op = 'appearance-based';
+        if (op && !(op in supportedType)) op = 'appearance-based';
         if (op === 'appearance-based') {
             if (nativeTheme.shouldUseDarkColors) op = 'dark';
             else op = 'light';

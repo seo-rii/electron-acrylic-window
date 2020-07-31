@@ -55,13 +55,14 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
         int blurColor = info[1].As<Napi::Number>().Int32Value();
         int isRS4OrGreater = info[2].As<Napi::Number>().Int32Value();
+
         if (hModule) {
             const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
                     hModule, "SetWindowCompositionAttribute");
             if (SetWindowCompositionAttribute) {
                 int gradientColor;
                 if (blurColor == 0) gradientColor = (1 << 24) | (0xFFFFFF & 0xFFFFFF);
-                else if (blurColor == 1) gradientColor = (1 << 24) | (0x990000 & 0xFFFFFF);
+                else if (blurColor == 1) gradientColor = (64 << 24) | (0x000000 & 0xFFFFFF);
                 else Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
                 AccentState blurType = isRS4OrGreater == 1 ? ACCENT_ENABLE_ACRYLICBLURBEHIND : ACCENT_ENABLE_BLURBEHIND;
                 AccentPolicy policy = {blurType, 2, gradientColor, 0};

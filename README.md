@@ -51,7 +51,8 @@ Error that occurs when fails to load SetWindowCompositionAttribute from user32.d
 * UNKNOWN  
 Unknown error.
 
-### disableVibrancy
+### ~~disableVibrancy~~
+* Deprecated, and will be removed on v1.0.0.
 ```javascript
 disableVibrancy(win);
 ```
@@ -65,6 +66,8 @@ This function will call ```win.setVibrancy(null)``` if os is not Windows 10.
 Error that occurs when ```win``` parameter is not passed.
 * NOT_VALID_WINDOW   
 Error that occurs when ```win``` parameter is not valid Electron window.
+* FAIL_LOAD_DLL   
+Error that occurs when fails to load binary module.
 * UNKNOWN  
 Unknown error.
 

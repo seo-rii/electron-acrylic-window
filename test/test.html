@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body style="width:100vw;height:100vh;margin:0;padding:0;border:1px solid rgba(0,0,0,0.4);background-color: rgba(0,0,0,0.2);box-sizing: border-box;user-select: none;">
-        <div style="-webkit-app-region: drag;width:100%;padding:10px 0;background-color:rgba(0,0,0,0.6);color:white;text-align: center;font-family:system-ui;">Title bar</div>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Application</title>
+    <link href="./src/style.css" rel="stylesheet" type="text/css">
+    <script src="./src/frameless.js"></script>
+</head>
+<body style="box-sizing: border-box;user-select: none;">
+<header id="titlebar">
+    <div id="drag-region">
+        <div id="window-title">
+            <span id="appTitle">Test Application</span>
+        </div>
+        <div id="window-controls">
+            <div class="button" id="min-button">
+                <span>&#xE921;</span>
+            </div>
+            <div class="button" id="max-button">
+                <span>&#xE922;</span>
+            </div>
+            <div class="button" id="restore-button">
+                <span>&#xE923;</span>
+            </div>
+            <div class="button" id="close-button">
+                <span>&#xE8BB;</span>
+            </div>
+        </div>
+    </div>
+</header>
+</body>
 </html>

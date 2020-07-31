@@ -8,12 +8,13 @@ function createWindow() {
         width: 800,
         height: 600,
         frame: false,
-        transparent: true,
+        webPreferences: {
+            nodeIntegration: true
+        },
         vibrancy: 'dark',
-        minWidth: 200,
-        minHeight: 200
     });
     win.loadURL(`file://${__dirname}/test.html`);
+    //win.webContents.openDevTools({mode: "detach"});
 }
 
 app.on('ready', createWindow);
