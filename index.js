@@ -103,7 +103,7 @@ class vBrowserWindow extends eBrowserWindow {
         if (op) this.setVibrancy(null);
         if (!isWindows10()) super.setVibrancy(op);
         else {
-            if (op && !(op in supportedType)) op = 'appearance-based';
+            if (op && supportedType.indexOf(op) === -1) op = 'appearance-based';
             if (op === 'appearance-based') {
                 if (nativeTheme.shouldUseDarkColors) op = 'dark';
                 else op = 'light';
@@ -125,7 +125,7 @@ function setVibrancy(win, op = 'appearance-based') {
     if (op) setVibrancy(win, null);
     if (!isWindows10()) win.setVibrancy(op);
     else {
-        if (op && !(op in supportedType)) op = 'appearance-based';
+        if (op && supportedType.indexOf(op) === -1) op = 'appearance-based';
         if (op === 'appearance-based') {
             if (nativeTheme.shouldUseDarkColors) op = 'dark';
             else op = 'light';
