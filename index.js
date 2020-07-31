@@ -116,11 +116,10 @@ class vBrowserWindow extends eBrowserWindow {
         }
 
         function guardingAgainstMoveUpdate(fn) {
-            const now = process.hrtime.bigint();
-            const timeDelta = now - moveLastUpdate;
+            const timeDelta = process.hrtime.bigint() - moveLastUpdate;
             if (pollingRate === undefined || timeDelta >= BigInt(Math.ceil(billion / pollingRate))) {
-                moveLastUpdate = now;
                 fn();
+                moveLastUpdate = process.hrtime.bigint();
                 return true;
             } else {
                 return false;
@@ -204,10 +203,9 @@ class vBrowserWindow extends eBrowserWindow {
             if (!win._resizeLastUpdate) win._resizeLastUpdate = BigInt(0);
 
             boundsPromise = boundsPromise.then(() => {
-                const now = process.hrtime.bigint();
-                if (now >= win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
-                    win._resizeLastUpdate = now;
+                if (process.hrtime.bigint() >= win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
                     setWindowBounds(lastWillResizeBounds);
+                    win._resizeLastUpdate = process.hrtime.bigint();
                 }
                 return doFollowUpQueryIfNecessary();
             });
