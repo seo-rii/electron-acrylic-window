@@ -88,7 +88,7 @@ class vBrowserWindow extends eBrowserWindow {
         let pollingRate;
         let doFollowUpQuery = false, isMoving = false, shouldMove = false;
         let moveLastUpdate = BigInt(0);
-        let lastWillMoveBounds, lastWillResizeBounds;
+        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds;
         let boundsPromise = Promise.race([
             getRefreshRateAtCursor().then(rate => {
                 pollingRate = rate || 30;
@@ -110,10 +110,11 @@ class vBrowserWindow extends eBrowserWindow {
         }
 
         function setWindowBounds(bounds) {
-            if (win.isDestroyed() || areBoundsEqual(bounds, win.getBounds())) {
+            if (win.isDestroyed()) {
                 return;
             }
             win.setBounds(bounds);
+            desiredMoveBounds = win.getBounds();
         }
 
         function guardingAgainstMoveUpdate(fn) {
@@ -140,6 +141,7 @@ class vBrowserWindow extends eBrowserWindow {
             // This also catches moving windows with the keyboard.
             const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => {
                 // Do nothing, the default behavior of the event is exactly what we want.
+                desiredMoveBounds = undefined;
             });
             if (didOptimisticMove) {
                 boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
@@ -191,6 +193,26 @@ class vBrowserWindow extends eBrowserWindow {
 
                 // Poll at 600hz while moving window
                 const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
+            }
+        });
+
+        win.on('move', (e) => {
+            if (isMoving || win.isDestroyed()) {
+                e.preventDefault();
+                return false;
+            }
+            // As insane as this sounds, Electron sometimes reacts to prior
+            // move events out of order. Specifically, if you have win.setBounds()
+            // twice, then for some reason, when you exit the move state, the second
+            // call to win.setBounds() gets reverted to the first call to win.setBounds().
+            //
+            // Again, it's nuts. But what we can do in this circumstance is thwack the
+            // window back into place just to spite Electron. Yes, there's a shiver.
+            // No, there's not much we can do about it until Electron gets their act together.
+            if (desiredMoveBounds !== undefined) {
+                const forceBounds = desiredMoveBounds;
+                desiredMoveBounds = undefined;
+                win.setBounds(forceBounds);
             }
         });
 
