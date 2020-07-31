@@ -33,6 +33,13 @@ function sleep(time) {
     return new Promise(resolve => setTimeout(resolve, time));
 }
 
+function areBoundsEqual(left, right) {
+    return left.height === right.height
+        && left.width === right.width
+        && left.x === right.x
+        && left.y === right.y;
+}
+
 const billion = 1000 * 1000 * 1000;
 
 class vBrowserWindow extends eBrowserWindow {
@@ -79,6 +86,8 @@ class vBrowserWindow extends eBrowserWindow {
         // So that there are no asynchronous race conditions.
         let pollingRate;
         let doFollowUpQuery = false;
+        let moveLastUpdate = BigInt(0);
+        let lastWillMoveBounds, lastWillResizeBounds;
         let boundsPromise = Promise.race([
             getRefreshRateAtCursor().then(rate => {
                 pollingRate = rate || 30;
@@ -99,8 +108,42 @@ class vBrowserWindow extends eBrowserWindow {
             }
         }
 
-        win.on('will-move', (e) => {
-            e.preventDefault()
+        function setWindowBounds(bounds) {
+            if (win.isDestroyed() || areBoundsEqual(bounds, win.getBounds())) {
+                return;
+            }
+            win.setBounds(bounds);
+        }
+
+        function guardingAgainstMoveUpdate(fn) {
+            const now = process.hrtime.bigint();
+            const timeDelta = now - moveLastUpdate;
+            if (pollingRate === undefined || timeDelta >= BigInt(Math.ceil(billion / pollingRate))) {
+                moveLastUpdate = now;
+                fn();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        win.on('will-move', (e, newBounds) => {
+            // We get a _lot_ of duplicate bounds sent to us in this event.
+            // This messes up our timing quite a bit.
+            if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
+                e.preventDefault();
+                return;
+            }
+            lastWillMoveBounds = newBounds;
+            // If we're asked to perform some move update and it's under
+            // the refresh speed limit, we can just do it immediately.
+            // This also catches moving windows with the keyboard.
+            const didOptimisticMove = !win._isMoving && guardingAgainstMoveUpdate(() => setWindowBounds(newBounds));
+            if (didOptimisticMove) {
+                boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
+                return;
+            }
+            e.preventDefault();
 
             // Track if the user is moving the window
             if (win._moveTimeout) clearTimeout(win._moveTimeout);
@@ -117,9 +160,8 @@ class vBrowserWindow extends eBrowserWindow {
                 if (win._moveInterval) return false;
 
                 // Get start positions
-                win._moveLastUpdate = BigInt(0)
-                win._moveStartBounds = win.getBounds()
-                win._moveStartCursor = screen.getCursorScreenPoint()
+                win._moveStartBounds = win.getBounds();
+                win._moveStartCursor = screen.getCursorScreenPoint();
 
                 // Handle polling at a slower interval than the setInterval handler
                 function handleIntervalTick(moveInterval) {
@@ -130,21 +172,20 @@ class vBrowserWindow extends eBrowserWindow {
                     }
 
                     boundsPromise = boundsPromise.then(() => {
-                        const now = process.hrtime.bigint();
-                        if (now >= win._moveLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
-                            win._moveLastUpdate = now;
-                            const cursor = screen.getCursorScreenPoint();
-
+                        const cursor = screen.getCursorScreenPoint();
+                        const didIt = guardingAgainstMoveUpdate(() => {
                             // Set new position
-                            win.setBounds({
+                            setWindowBounds({
                                 x: win._moveStartBounds.x + (cursor.x - win._moveStartCursor.x),
                                 y: win._moveStartBounds.y + (cursor.y - win._moveStartCursor.y),
                                 width: win._moveStartBounds.width,
                                 height: win._moveStartBounds.height
                             });
+                        });
+                        if (didIt) {
                             return doFollowUpQueryIfNecessary(cursor);
                         }
-                    })
+                    });
                 }
 
                 // Poll at 600hz while moving window
@@ -155,18 +196,21 @@ class vBrowserWindow extends eBrowserWindow {
 
         win.on('will-resize', (e, newBounds) => {
             e.preventDefault();
-            if (!win._resizeLastUpdate) win._resizeLastUpdate = BigInt(0);
-            win._lastRequestedBounds = newBounds;
+            if (lastWillResizeBounds !== undefined && areBoundsEqual(lastWillResizeBounds, newBounds)) {
+                return;
+            }
 
-            boundsPromise = boundsPromise
-                .then(doFollowUpQueryIfNecessary)
-                .then(() => {
-                    const now = process.hrtime.bigint();
-                    if (now >= win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
-                        win._resizeLastUpdate = now;
-                        win.setBounds(win._lastRequestedBounds);
-                    }
-                });
+            lastWillResizeBounds = newBounds;
+            if (!win._resizeLastUpdate) win._resizeLastUpdate = BigInt(0);
+
+            boundsPromise = boundsPromise.then(() => {
+                const now = process.hrtime.bigint();
+                if (now >= win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
+                    win._resizeLastUpdate = now;
+                    setWindowBounds(lastWillResizeBounds);
+                }
+                return doFollowUpQueryIfNecessary();
+            });
         })
 
         // Close the VerticalRefreshRateContext so Node can exit cleanly
