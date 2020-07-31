@@ -53,10 +53,11 @@ class vBrowserWindow extends eBrowserWindow {
         // in the backlog without taking the time difference into consideration,
         // you end up with visible movement lag.
         //
-        // We tried pairing 'will-resize' with 'resize' and 'will-move' with 'move',
-        // but Electron actually sends the 'resize' and 'move' events _before_ Windows
-        // actually commits to the operation. There's likely some queuing going on
-        // that's getting backed up.
+        // We tried pairing 'will-move' with 'move', but Electron actually sends the
+        // 'move' events _before_ Windows actually commits to the operation. There's
+        // likely some queuing going on that's getting backed up. This is not the case
+        // with 'will-resize' and 'resize', which need to use the default behavior
+        // for compatibility with soft DPI scaling.
         //
         // The ideal rate of moving and resizing is based on the vertical sync
         // rate: if your display is only fully updating at 120 Hz, we shouldn't
@@ -86,7 +87,6 @@ class vBrowserWindow extends eBrowserWindow {
         // So that there are no asynchronous race conditions.
         let pollingRate;
         let doFollowUpQuery = false, isMoving = false, shouldMove = false;
-        let moveStartBounds, moveStartCursor;
         let moveLastUpdate = BigInt(0);
         let lastWillMoveBounds, lastWillResizeBounds;
         let boundsPromise = Promise.race([
@@ -138,7 +138,9 @@ class vBrowserWindow extends eBrowserWindow {
             // If we're asked to perform some move update and it's under
             // the refresh speed limit, we can just do it immediately.
             // This also catches moving windows with the keyboard.
-            const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => setWindowBounds(newBounds));
+            const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => {
+                // Do nothing, the default behavior of the event is exactly what we want.
+            });
             if (didOptimisticMove) {
                 boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
                 return;
@@ -190,28 +192,30 @@ class vBrowserWindow extends eBrowserWindow {
                 // Poll at 600hz while moving window
                 const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
             }
-        })
+        });
 
         win.on('will-resize', (e, newBounds) => {
-            e.preventDefault();
             if (lastWillResizeBounds !== undefined && areBoundsEqual(lastWillResizeBounds, newBounds)) {
+                e.preventDefault();
                 return;
             }
 
             lastWillResizeBounds = newBounds;
             if (!win._resizeLastUpdate) win._resizeLastUpdate = BigInt(0);
 
-            boundsPromise = boundsPromise.then(() => {
-                if (process.hrtime.bigint() >= win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
-                    setWindowBounds(lastWillResizeBounds);
-                    win._resizeLastUpdate = process.hrtime.bigint();
-                }
-                return doFollowUpQueryIfNecessary();
-            });
-        })
+            if (process.hrtime.bigint() < win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        win.on('resize', () => {
+            win._resizeLastUpdate = process.hrtime.bigint();
+            boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
+        });
 
         // Close the VerticalRefreshRateContext so Node can exit cleanly
-        win.on("closed", refreshCtx.close);
+        win.on('closed', refreshCtx.close);
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
             setTimeout(() => {
