@@ -85,7 +85,8 @@ class vBrowserWindow extends eBrowserWindow {
         //
         // So that there are no asynchronous race conditions.
         let pollingRate;
-        let doFollowUpQuery = false;
+        let doFollowUpQuery = false, isMoving = false, shouldMove = false;
+        let moveStartBounds, moveStartCursor;
         let moveLastUpdate = BigInt(0);
         let lastWillMoveBounds, lastWillResizeBounds;
         let boundsPromise = Promise.race([
@@ -137,7 +138,7 @@ class vBrowserWindow extends eBrowserWindow {
             // If we're asked to perform some move update and it's under
             // the refresh speed limit, we can just do it immediately.
             // This also catches moving windows with the keyboard.
-            const didOptimisticMove = !win._isMoving && guardingAgainstMoveUpdate(() => setWindowBounds(newBounds));
+            const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => setWindowBounds(newBounds));
             if (didOptimisticMove) {
                 boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
                 return;
@@ -146,39 +147,38 @@ class vBrowserWindow extends eBrowserWindow {
 
             // Track if the user is moving the window
             if (win._moveTimeout) clearTimeout(win._moveTimeout);
-            win._moveTimeout = setTimeout(
-                () => {
-                    win._isMoving = false
-                    clearInterval(win._moveInterval)
-                    win._moveInterval = null
-                }, 1000 / 60)
+            win._moveTimeout = setTimeout(() => {
+                shouldMove = false;
+            }, 1000 / 60);
 
             // Start new behavior if not already
-            if (!win._isMoving) {
-                win._isMoving = true
-                if (win._moveInterval) return false;
+            if (!shouldMove) {
+                shouldMove = true;
+
+                if (isMoving) return false;
+                isMoving = true;
 
                 // Get start positions
-                win._moveStartBounds = win.getBounds();
-                win._moveStartCursor = screen.getCursorScreenPoint();
+                const basisBounds = win.getBounds();
+                const basisCursor = screen.getCursorScreenPoint();
 
                 // Handle polling at a slower interval than the setInterval handler
                 function handleIntervalTick(moveInterval) {
-                    if (win._moveInterval !== moveInterval) {
-                        // If the intervals aren't equal, then _this_ invocation is finished.
-                        // Another one may or may not be going on instead.
-                        return;
-                    }
-
                     boundsPromise = boundsPromise.then(() => {
+                        if (!shouldMove) {
+                            isMoving = false;
+                            clearInterval(moveInterval);
+                            return;
+                        }
+
                         const cursor = screen.getCursorScreenPoint();
                         const didIt = guardingAgainstMoveUpdate(() => {
                             // Set new position
                             setWindowBounds({
-                                x: win._moveStartBounds.x + (cursor.x - win._moveStartCursor.x),
-                                y: win._moveStartBounds.y + (cursor.y - win._moveStartCursor.y),
-                                width: win._moveStartBounds.width,
-                                height: win._moveStartBounds.height
+                                x: basisBounds.x + (cursor.x - basisCursor.x),
+                                y: basisBounds.y + (cursor.y - basisCursor.y),
+                                width: basisBounds.width,
+                                height: basisBounds.height
                             });
                         });
                         if (didIt) {
@@ -189,7 +189,6 @@ class vBrowserWindow extends eBrowserWindow {
 
                 // Poll at 600hz while moving window
                 const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
-                win._moveInterval = moveInterval;
             }
         })
 
