@@ -103,12 +103,16 @@ class vBrowserWindow extends eBrowserWindow {
         if (op) this.setVibrancy(null);
         if (!isWindows10()) super.setVibrancy(op);
         else {
-            if (op && supportedType.indexOf(op) === -1) op = 'appearance-based';
+            if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
             if (op === 'appearance-based') {
                 if (nativeTheme.shouldUseDarkColors) op = 'dark';
                 else op = 'light';
             }
-            if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1, isRS4OrGreater() ? 1 : 0);
+            let redValue, greenValue, blueValue, alphaValue;
+            if (op === 'light') redValue = 255, greenValue = 255, blueValue = 255, alphaValue = 64;
+            else if (op === 'dark') redValue = 0, greenValue = 0, blueValue = 0, alphaValue = 128;
+            else if (op) redValue = parseInt(op.substring(1, 3), 16), greenValue = parseInt(op.substring(3, 5), 16), blueValue = parseInt(op.substring(5, 7), 16), alphaValue = parseInt(op.substring(7, 9), 16);
+            if (op) wSetVibrancy(getHwnd(this), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
             else wDisableVibrancy(getHwnd(this));
         }
     }
@@ -125,12 +129,16 @@ function setVibrancy(win, op = 'appearance-based') {
     if (op) setVibrancy(win, null);
     if (!isWindows10()) win.setVibrancy(op);
     else {
-        if (op && supportedType.indexOf(op) === -1) op = 'appearance-based';
+        if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
         if (op === 'appearance-based') {
             if (nativeTheme.shouldUseDarkColors) op = 'dark';
             else op = 'light';
         }
-        if (op) wSetVibrancy(getHwnd(this), op === 'light' ? 0 : 1, isRS4OrGreater() ? 1 : 0);
+        let redValue, greenValue, blueValue, alphaValue;
+        if (op === 'light') redValue = 255, greenValue = 255, blueValue = 255, alphaValue = 64;
+        else if (op === 'dark') redValue = 0, greenValue = 0, blueValue = 0, alphaValue = 128;
+        else if (op) redValue = parseInt(op.subsstring(1, 3), 16), greenValue = parseInt(op.subsstring(3, 5), 16), blueValue = parseInt(op.subsstring(5, 7), 16), alphaValue = parseInt(op.subsstring(7, 9), 16);
+        if (op) wSetVibrancy(getHwnd(this), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
         else wDisableVibrancy(getHwnd(this));
     }
 }

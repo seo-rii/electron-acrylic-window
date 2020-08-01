@@ -173,3 +173,7 @@ body {
 #window-controls * {
     transition: opacity 0.3s;
 }
+
+main {
+    margin-top: 32px;
+}

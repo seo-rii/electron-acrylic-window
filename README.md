@@ -36,9 +36,9 @@ setVibrancy(win, op = null);
 ```
 Enables Vibrancy to window.  
 There is no return value. If it fails to set vibrancy, it throws error.  
-```win``` should be frameLess, and transparent.  
+```win``` should be frameLess.  
 This function will call ```win.setVibrancy(op)``` if os is not Windows 10.  
-On Windows 10, op should be 'light', 'dark', or 'appearance-based'.  
+On Windows 10, op should be 'light', 'dark', or 'appearance-based' or RGBA Code.  
 If not, it'll set as 'appearance-based'.
 
 #### Errors
