@@ -24,6 +24,10 @@ html, body {
     margin: 0;
 }
 
+body {
+    font-family: system-ui
+}
+
 h1 {
     margin: 0 0 10px 0;
     font-weight: 600;
@@ -151,6 +155,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.5;
+    font-family: system-ui !important;
 }
 
 .maximized #titlebar {
