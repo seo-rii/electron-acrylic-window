@@ -248,6 +248,11 @@ class vBrowserWindow extends eBrowserWindow {
                 e.preventDefault();
                 return false;
             }
+            // We have to count this twice: once before the resize,
+            // and once after the resize. We actually don't have any
+            // timing control around _when_ the resize happened, so
+            // we have to be pessimistic.
+            resizeLastUpdate = process.hrtime.bigint();
         });
 
         win.on('resize', () => {
