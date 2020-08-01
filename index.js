@@ -121,12 +121,13 @@ class vBrowserWindow extends eBrowserWindow {
             desiredMoveBounds = win.getBounds();
         }
 
-        function currentTimeBeforeNextWindow(lastTime) {
-            return process.hrtime.bigint() < lastTime + hrtimeDeltaForFrequency(pollingRate);
+        function currentTimeBeforeNextActivityWindow(lastTime, forceFreq) {
+            return process.hrtime.bigint() < 
+                lastTime + hrtimeDeltaForFrequency(forceFreq || pollingRate || 30);
         }
 
         function guardingAgainstMoveUpdate(fn) {
-            if (pollingRate === undefined || !currentTimeBeforeNextWindow(moveLastUpdate)) {
+            if (pollingRate === undefined || !currentTimeBeforeNextActivityWindow(moveLastUpdate)) {
                 fn();
                 moveLastUpdate = process.hrtime.bigint();
                 return true;
@@ -232,7 +233,11 @@ class vBrowserWindow extends eBrowserWindow {
 
             lastWillResizeBounds = newBounds;
 
-            if (currentTimeBeforeNextWindow(resizeLastUpdate)) {
+            // 60 Hz ought to be enough... for resizes.
+            // Some systems have trouble going 120 Hz, so we'll just take the lower
+            // of the current pollingRate and 60 Hz.
+            if (pollingRate !== undefined &&
+                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
                 e.preventDefault();
                 return false;
             }
