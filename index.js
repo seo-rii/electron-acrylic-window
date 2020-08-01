@@ -92,7 +92,7 @@ class vBrowserWindow extends eBrowserWindow {
         let pollingRate;
         let doFollowUpQuery = false, isMoving = false, shouldMove = false;
         let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
-        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds, desiredResizeBounds, basisBounds;
+        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds;
         let boundsPromise = Promise.race([
             getRefreshRateAtCursor().then(rate => {
                 pollingRate = rate || 30;
@@ -170,7 +170,7 @@ class vBrowserWindow extends eBrowserWindow {
                 isMoving = true;
 
                 // Get start positions
-                basisBounds = win.getBounds();
+                const basisBounds = win.getBounds();
                 const basisCursor = screen.getCursorScreenPoint();
 
                 // Handle polling at a slower interval than the setInterval handler
@@ -178,7 +178,6 @@ class vBrowserWindow extends eBrowserWindow {
                     boundsPromise = boundsPromise.then(() => {
                         if (!shouldMove) {
                             isMoving = false;
-                            basisBounds = undefined;
                             clearInterval(moveInterval);
                             return;
                         }
@@ -189,8 +188,6 @@ class vBrowserWindow extends eBrowserWindow {
                             setWindowBounds({
                                 x: basisBounds.x + (cursor.x - basisCursor.x),
                                 y: basisBounds.y + (cursor.y - basisCursor.y),
-                                width: basisBounds.width,
-                                height: basisBounds.height
                             });
                         });
                         if (didIt) {
@@ -233,16 +230,7 @@ class vBrowserWindow extends eBrowserWindow {
                 return;
             }
 
-            if (basisBounds !== undefined) {
-                basisBounds = {
-                    ...basisBounds,
-                    width: newBounds.width,
-                    height: newBounds.height,
-                };
-            }
-
             lastWillResizeBounds = newBounds;
-            desiredResizeBounds = newBounds;
 
             if (currentTimeBeforeNextWindow(resizeLastUpdate)) {
                 e.preventDefault();
@@ -256,17 +244,6 @@ class vBrowserWindow extends eBrowserWindow {
         });
 
         win.on('resize', () => {
-            // See the 'move' event for a rationale here.
-            // Electron likes to handle resize events out of order, which
-            // often ends up with a permanently maximized window.
-            if (desiredResizeBounds !== undefined) {
-                const forceBounds = desiredResizeBounds;
-                desiredResizeBounds = undefined;
-                win.setBounds({
-                    height: forceBounds.height,
-                    width: forceBounds.width
-                });
-            }
             resizeLastUpdate = process.hrtime.bigint();
             boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
         });
