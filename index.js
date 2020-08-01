@@ -42,6 +42,10 @@ function areBoundsEqual(left, right) {
 
 const billion = 1000 * 1000 * 1000;
 
+function hrtimeDeltaForFrequency(freq) {
+    return BigInt(Math.ceil(billion / freq));
+}
+
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
         props.backgroundColor = '#00000000';
@@ -87,8 +91,8 @@ class vBrowserWindow extends eBrowserWindow {
         // So that there are no asynchronous race conditions.
         let pollingRate;
         let doFollowUpQuery = false, isMoving = false, shouldMove = false;
-        let moveLastUpdate = BigInt(0);
-        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds;
+        let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
+        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds, desiredResizeBounds, basisBounds;
         let boundsPromise = Promise.race([
             getRefreshRateAtCursor().then(rate => {
                 pollingRate = rate || 30;
@@ -117,9 +121,12 @@ class vBrowserWindow extends eBrowserWindow {
             desiredMoveBounds = win.getBounds();
         }
 
+        function currentTimeBeforeNextWindow(lastTime) {
+            return process.hrtime.bigint() < lastTime + hrtimeDeltaForFrequency(pollingRate);
+        }
+
         function guardingAgainstMoveUpdate(fn) {
-            const timeDelta = process.hrtime.bigint() - moveLastUpdate;
-            if (pollingRate === undefined || timeDelta >= BigInt(Math.ceil(billion / pollingRate))) {
+            if (pollingRate === undefined || !currentTimeBeforeNextWindow(moveLastUpdate)) {
                 fn();
                 moveLastUpdate = process.hrtime.bigint();
                 return true;
@@ -163,7 +170,7 @@ class vBrowserWindow extends eBrowserWindow {
                 isMoving = true;
 
                 // Get start positions
-                const basisBounds = win.getBounds();
+                basisBounds = win.getBounds();
                 const basisCursor = screen.getCursorScreenPoint();
 
                 // Handle polling at a slower interval than the setInterval handler
@@ -171,6 +178,7 @@ class vBrowserWindow extends eBrowserWindow {
                     boundsPromise = boundsPromise.then(() => {
                         if (!shouldMove) {
                             isMoving = false;
+                            basisBounds = undefined;
                             clearInterval(moveInterval);
                             return;
                         }
@@ -212,7 +220,10 @@ class vBrowserWindow extends eBrowserWindow {
             if (desiredMoveBounds !== undefined) {
                 const forceBounds = desiredMoveBounds;
                 desiredMoveBounds = undefined;
-                win.setBounds(forceBounds);
+                win.setBounds({
+                    x: forceBounds.x,
+                    y: forceBounds.y
+                });
             }
         });
 
@@ -222,17 +233,36 @@ class vBrowserWindow extends eBrowserWindow {
                 return;
             }
 
-            lastWillResizeBounds = newBounds;
-            if (!win._resizeLastUpdate) win._resizeLastUpdate = BigInt(0);
+            if (basisBounds !== undefined) {
+                basisBounds = {
+                    ...basisBounds,
+                    width: newBounds.width,
+                    height: newBounds.height,
+                };
+            }
 
-            if (process.hrtime.bigint() < win._resizeLastUpdate + BigInt(Math.ceil(billion / pollingRate))) {
+            lastWillResizeBounds = newBounds;
+            desiredResizeBounds = newBounds;
+
+            if (currentTimeBeforeNextWindow(resizeLastUpdate)) {
                 e.preventDefault();
                 return false;
             }
         });
 
         win.on('resize', () => {
-            win._resizeLastUpdate = process.hrtime.bigint();
+            // See the 'move' event for a rationale here.
+            // Electron likes to handle resize events out of order, which
+            // often ends up with a permanently maximized window.
+            if (desiredResizeBounds !== undefined) {
+                const forceBounds = desiredResizeBounds;
+                desiredResizeBounds = undefined;
+                win.setBounds({
+                    height: forceBounds.height,
+                    width: forceBounds.width
+                });
+            }
+            resizeLastUpdate = process.hrtime.bigint();
             boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
         });
 
