@@ -21,7 +21,7 @@ npm i electron-acrylic-window --save
 ```
 
 ## Screenshots
-![Screenshot1](./screenshots/2.png)
+![Screenshot2](./screenshots/2.png)
 
 ## Usage
 
