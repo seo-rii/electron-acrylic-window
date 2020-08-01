@@ -128,8 +128,8 @@ class vBrowserWindow extends eBrowserWindow {
 
         function guardingAgainstMoveUpdate(fn) {
             if (pollingRate === undefined || !currentTimeBeforeNextActivityWindow(moveLastUpdate)) {
-                fn();
                 moveLastUpdate = process.hrtime.bigint();
+                fn();
                 return true;
             } else {
                 return false;
