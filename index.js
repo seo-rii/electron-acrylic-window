@@ -3,6 +3,7 @@ const os = require("os");
 const eBrowserWindow = require("electron").BrowserWindow;
 const {nativeTheme, screen} = require("electron");
 const supportedType = ['light', 'dark', 'appearance-based'];
+const {getMonitorInfo} = require('display-info');
 
 function isWindows10() {
     if (process.platform !== 'win32') return false;
@@ -35,8 +36,15 @@ class vBrowserWindow extends eBrowserWindow {
         const win = new eBrowserWindow(props);
         vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
 
+        let pollingRate = 0;
+        let monitorInfo = getMonitorInfo();
+
+        for (let i of monitorInfo) {
+            if (i.frameRate > pollingRate) pollingRate = i.frameRate;
+        }
+        if (!pollingRate) pollingRate = 60;
+
         // Replace window moving behavior to fix mouse polling rate bug
-        const pollingRate = 144;
         win.on('will-move', (e) => {
             e.preventDefault()
 

@@ -1,6 +1,6 @@
 {
   "name": "electron-acrylic-window",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Add vibrancy effect for electron",
   "main": "index.js",
   "keywords": [
@@ -35,7 +35,8 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "node-gyp": "^7.0.0",
-    "node-addon-api": "^3.0.0"
+    "node-addon-api": "^3.0.0",
+    "display-info": "^0.0.1"
   },
   "devDependencies": {
     "electron": "^9.1.1"
