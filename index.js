@@ -5,6 +5,8 @@ const {nativeTheme, screen} = require("electron");
 const supportedType = ['light', 'dark', 'appearance-based'];
 const {getMonitorInfo} = require('display-info');
 
+const _lightThemeColor = '#FFFFFF40', _darkThemeColor = '#44444480';
+
 function isWindows10() {
     if (process.platform !== 'win32') return false;
     return os.release().split('.')[0] === '10';
@@ -29,12 +31,47 @@ function getHwnd(win) {
     }
 }
 
+function _setVibrancy(win, op = null) {
+    if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
+    if (op === 'appearance-based') {
+        if (nativeTheme.shouldUseDarkColors) op = 'dark';
+        else op = 'light';
+    }
+    let redValue, greenValue, blueValue, alphaValue;
+    if (op === 'light') op = _lightThemeColor;
+    else if (op === 'dark') op = _darkThemeColor;
+    if (op) redValue = parseInt(op.substring(1, 3), 16), greenValue = parseInt(op.substring(3, 5), 16), blueValue = parseInt(op.substring(5, 7), 16), alphaValue = parseInt(op.substring(7, 9), 16);
+    if (op) {
+        wSetVibrancy(getHwnd(win), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
+        win._vibrancyActivated = true;
+        setTimeout(() => {
+            if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+        }, 50);
+    } else {
+        win._ignoreBlurFocusEvent = 2;
+        win._vibrancyActivated = false;
+        let bOp = win._vibrancyOp;
+        if (bOp === 'light') bOp = _lightThemeColor;
+        else if (bOp === 'dark') bOp = _darkThemeColor;
+        win.setBackgroundColor('#99' + bOp.substring(1, 7));
+        setTimeout(() => {
+            if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
+        }, 10);
+    }
+}
+
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
-        props.backgroundColor = '#00000000';
-        props.show = false;
+        if (props.vibrancy) {
+            let bOp = props.vibrancy;
+            if (bOp === 'light') bOp = _lightThemeColor;
+            else if (bOp === 'dark') bOp = _darkThemeColor;
+            props.backgroundColor = bOp.substring(0, 7);
+            props.show = false;
+        }
         const win = new eBrowserWindow(props);
         vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
+        win._vibrancyOp = props.vibrancy;
 
         let pollingRate = 0;
         let monitorInfo = getMonitorInfo();
@@ -97,6 +134,14 @@ class vBrowserWindow extends eBrowserWindow {
             }
         })
 
+        win.on('blur', () => {
+            if (win._vibrancyOp) _setVibrancy(win, null);
+        })
+
+        win.on('focus', () => {
+            if (win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
+        })
+
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
             setTimeout(() => {
                 win.show();
@@ -108,20 +153,11 @@ class vBrowserWindow extends eBrowserWindow {
     }
 
     static setVibrancy(op = null) {
-        if (op) this.setVibrancy(null);
+        this._vibrancyOp = op;
         if (!isWindows10()) super.setVibrancy(op);
         else {
-            if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
-            if (op === 'appearance-based') {
-                if (nativeTheme.shouldUseDarkColors) op = 'dark';
-                else op = 'light';
-            }
-            let redValue, greenValue, blueValue, alphaValue;
-            if (op === 'light') redValue = 255, greenValue = 255, blueValue = 255, alphaValue = 64;
-            else if (op === 'dark') redValue = 0, greenValue = 0, blueValue = 0, alphaValue = 128;
-            else if (op) redValue = parseInt(op.substring(1, 3), 16), greenValue = parseInt(op.substring(3, 5), 16), blueValue = parseInt(op.substring(5, 7), 16), alphaValue = parseInt(op.substring(7, 9), 16);
-            if (op) wSetVibrancy(getHwnd(this), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
-            else wDisableVibrancy(getHwnd(this));
+            if (op) _setVibrancy(this, null);
+            _setVibrancy(this, op);
         }
     }
 
@@ -134,20 +170,20 @@ class vBrowserWindow extends eBrowserWindow {
 }
 
 function setVibrancy(win, op = 'appearance-based') {
-    if (op) setVibrancy(win, null);
+    win._vibrancyOp = op;
     if (!isWindows10()) win.setVibrancy(op);
     else {
-        if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
-        if (op === 'appearance-based') {
-            if (nativeTheme.shouldUseDarkColors) op = 'dark';
-            else op = 'light';
+        if (op) _setVibrancy(this, null);
+        else {
+            let bOp = win._vibrancyOp;
+            if (bOp === 'light') bOp = _lightThemeColor;
+            else if (bOp === 'dark') bOp = _darkThemeColor;
+            win.setBackgroundColor(bOp.substring(0, 7));
+            win.focus();
+            win.blur();
+            win.focus();
+            _setVibrancy(this, op);
         }
-        let redValue, greenValue, blueValue, alphaValue;
-        if (op === 'light') redValue = 255, greenValue = 255, blueValue = 255, alphaValue = 64;
-        else if (op === 'dark') redValue = 0, greenValue = 0, blueValue = 0, alphaValue = 128;
-        else if (op) redValue = parseInt(op.subsstring(1, 3), 16), greenValue = parseInt(op.subsstring(3, 5), 16), blueValue = parseInt(op.subsstring(5, 7), 16), alphaValue = parseInt(op.subsstring(7, 9), 16);
-        if (op) wSetVibrancy(getHwnd(this), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
-        else wDisableVibrancy(getHwnd(this));
     }
 }
 
