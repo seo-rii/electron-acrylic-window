@@ -34,11 +34,11 @@
   "gypfile": true,
   "dependencies": {
     "bindings": "^1.5.0",
-    "node-gyp": "^7.0.0",
+    "node-gyp": "^7.1.0",
     "node-addon-api": "^3.0.0",
     "display-info": "^0.0.1"
   },
   "devDependencies": {
-    "electron": "^9.1.1"
+    "electron": "^9.2.1"
   }
 }
