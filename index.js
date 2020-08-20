@@ -62,6 +62,8 @@ function _setVibrancy(win, op = null) {
 
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
+        let oShow = props.show;
+        if (!('show' in props)) oShow = true;
         if (props.vibrancy) {
             let bOp = props.vibrancy;
             if (bOp === 'light') bOp = _lightThemeColor;
@@ -144,7 +146,7 @@ class vBrowserWindow extends eBrowserWindow {
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
             setTimeout(() => {
-                win.show();
+                if (oShow) win.show();
                 win.setVibrancy(props.vibrancy);
             }, 100);
         });
