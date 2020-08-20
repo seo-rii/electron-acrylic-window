@@ -1,6 +1,5 @@
 #include <napi.h>
 #include <dwmapi.h>
-#include <VersionHelpers.h>
 
 enum AccentState {
     ACCENT_DISABLED = 0,
@@ -36,10 +35,6 @@ const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
 void setVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     try {
-        if (!IsWindows10OrGreater()) {
-            Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
-            return;
-        }
         if (info.Length() == 0) {
             Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
             return;
@@ -86,10 +81,6 @@ void setVibrancy(const Napi::CallbackInfo &info) {
 void disableVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     try {
-        if (!IsWindows10OrGreater()) {
-            Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
-            return;
-        }
         if (info.Length() != 1) {
             Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
             return;

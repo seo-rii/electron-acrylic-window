@@ -135,11 +135,11 @@ class vBrowserWindow extends eBrowserWindow {
         })
 
         win.on('blur', () => {
-            if (win._vibrancyOp) _setVibrancy(win, null);
+            if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
         })
 
         win.on('focus', () => {
-            if (win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
+            if (isWindows10() && win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
         })
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
