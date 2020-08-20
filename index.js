@@ -174,16 +174,7 @@ function setVibrancy(win, op = 'appearance-based') {
     if (!isWindows10()) win.setVibrancy(op);
     else {
         if (op) _setVibrancy(this, null);
-        else {
-            let bOp = win._vibrancyOp;
-            if (bOp === 'light') bOp = _lightThemeColor;
-            else if (bOp === 'dark') bOp = _darkThemeColor;
-            win.setBackgroundColor(bOp.substring(0, 7));
-            win.focus();
-            win.blur();
-            win.focus();
-            _setVibrancy(this, op);
-        }
+        else _setVibrancy(this, op);
     }
 }
 
