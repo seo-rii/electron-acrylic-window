@@ -1,6 +1,5 @@
 #include <napi.h>
 #include <dwmapi.h>
-#include <VersionHelpers.h>
 
 enum AccentState {
     ACCENT_DISABLED = 0,
@@ -36,15 +35,11 @@ const HINSTANCE hModule = LoadLibrary(TEXT("user32.dll"));
 void setVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     try {
-        if (!IsWindows10OrGreater()) {
-            Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
-            return;
-        }
         if (info.Length() == 0) {
             Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
             return;
         }
-        if (info.Length() != 3) {
+        if (info.Length() != 6) {
             Napi::TypeError::New(env, "PARAMETER_ERROR").ThrowAsJavaScriptException();
             return;
         }
@@ -53,17 +48,18 @@ void setVibrancy(const Napi::CallbackInfo &info) {
             return;
         }
         HWND hWnd = (HWND) info[0].As<Napi::Number>().Int64Value();
-        int blurColor = info[1].As<Napi::Number>().Int32Value();
-        int isRS4OrGreater = info[2].As<Napi::Number>().Int32Value();
+        int isRS4OrGreater = info[1].As<Napi::Number>().Int32Value();
+
+        int redValue = info[2].As<Napi::Number>().Int32Value();
+        int greenValue = info[3].As<Napi::Number>().Int32Value();
+        int blueValue = info[4].As<Napi::Number>().Int32Value();
+        int alphaValue = info[5].As<Napi::Number>().Int32Value();
 
         if (hModule) {
             const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(
                     hModule, "SetWindowCompositionAttribute");
             if (SetWindowCompositionAttribute) {
-                int gradientColor;
-                if (blurColor == 0) gradientColor = (64<< 24) | (0xFFFFFF & 0xFFFFFF);
-                else if (blurColor == 1) gradientColor = (128 << 24) | (0x000000 & 0xFFFFFF);
-                else Napi::TypeError::New(env, "UNKNOWN").ThrowAsJavaScriptException();
+                int gradientColor = (alphaValue<<24) + (blueValue<<16) + (greenValue<<8) + (redValue);
                 AccentState blurType = isRS4OrGreater == 1 ? ACCENT_ENABLE_ACRYLICBLURBEHIND : ACCENT_ENABLE_BLURBEHIND;
                 AccentPolicy policy = {blurType, 2, gradientColor, 0};
                 WindowCompositionAttributeData data = {WCA_ACCENT_POLICY, &policy, sizeof(AccentPolicy)};
@@ -85,10 +81,6 @@ void setVibrancy(const Napi::CallbackInfo &info) {
 void disableVibrancy(const Napi::CallbackInfo &info) {
     Napi::Env env = info.Env();
     try {
-        if (!IsWindows10OrGreater()) {
-            Napi::Error::New(env, "NOT_MATCHING_PLATFORM").ThrowAsJavaScriptException();
-            return;
-        }
         if (info.Length() != 1) {
             Napi::TypeError::New(env, "WINDOW_NOT_GIVEN").ThrowAsJavaScriptException();
             return;
