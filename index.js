@@ -196,7 +196,6 @@ class vBrowserWindow extends eBrowserWindow {
         }
 
         win.on('will-move', (e, newBounds) => {
-            console.log(newBounds)
             // We get a _lot_ of duplicate bounds sent to us in this event.
             // This messes up our timing quite a bit.
             if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
