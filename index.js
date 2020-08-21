@@ -89,6 +89,9 @@ class vBrowserWindow extends eBrowserWindow {
             props.show = false;
         }
         const win = new eBrowserWindow(props);
+        vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
+        win._vibrancyOp = props.vibrancy;
+
         // Unfortunately, we have to re-implement moving and resizing.
         // Enabling vibrancy slows down the window's event handling loop to the
         // point building a mouse event backlog. If you just handle these events
@@ -118,8 +121,6 @@ class vBrowserWindow extends eBrowserWindow {
             cursor = cursor || screen.getCursorScreenPoint();
             return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y);
         }
-
-        vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
 
         // Ensure all movement operation is serialized, by setting up a continuous promise chain
         // All movement operation will take the form of
