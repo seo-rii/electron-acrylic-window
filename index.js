@@ -4,7 +4,6 @@ const eBrowserWindow = require("electron").BrowserWindow;
 const {nativeTheme, screen} = require("electron");
 const { VerticalRefreshRateContext } = require("win32-displayconfig");
 const supportedType = ['light', 'dark', 'appearance-based'];
-const {getMonitorInfo} = require('display-info');
 
 const _lightThemeColor = '#FFFFFF40', _darkThemeColor = '#44444480';
 

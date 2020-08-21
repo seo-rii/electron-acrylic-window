@@ -37,7 +37,6 @@
     "bindings": "^1.5.0",
     "node-gyp": "^7.1.0",
     "node-addon-api": "^3.0.0",
-    "display-info": "^0.0.1",
     "win32-displayconfig": "^0.1.0"
   },
   "devDependencies": {
