@@ -78,7 +78,7 @@ On Windows 10, op should be String or Object.
         **This is experimental option. It can cause unintentional error.**
    * maximumRefreshRate  
         Maximum value to refresh application screen in second.  
-   * disableOnBlur 
+   * disableOnBlur   
         If true, acrylic effect will be disabled when window blurred.
     
 
