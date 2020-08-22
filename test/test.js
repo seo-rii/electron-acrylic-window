@@ -11,7 +11,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true
         },
-        vibrancy: '#ffff0066'
+        vibrancy: '#ffffff66'
     });
     win.loadURL(`file://${__dirname}/test.html`);
     //win.webContents.openDevTools({mode: "detach"});

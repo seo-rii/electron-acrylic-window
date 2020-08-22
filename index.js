@@ -2,7 +2,7 @@ const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require("
 const os = require("os");
 const eBrowserWindow = require("electron").BrowserWindow;
 const {nativeTheme, screen} = require("electron");
-const { VerticalRefreshRateContext } = require("win32-displayconfig");
+const {VerticalRefreshRateContext} = require("win32-displayconfig");
 const supportedType = ['light', 'dark', 'appearance-based'];
 
 const _lightThemeColor = '#FFFFFF40', _darkThemeColor = '#44444480';
@@ -81,7 +81,7 @@ class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
         let oShow = props.show;
         if (!('show' in props)) oShow = true;
-        if (props.vibrancy) {
+        if (isWindows10() && props.vibrancy) {
             let bOp = props.vibrancy;
             if (bOp === 'light') bOp = _lightThemeColor;
             else if (bOp === 'dark') bOp = _darkThemeColor;
@@ -161,7 +161,7 @@ class vBrowserWindow extends eBrowserWindow {
         }
 
         function currentTimeBeforeNextActivityWindow(lastTime, forceFreq) {
-            return process.hrtime.bigint() < 
+            return process.hrtime.bigint() <
                 lastTime + hrtimeDeltaForFrequency(forceFreq || pollingRate || 30);
         }
 
@@ -276,7 +276,7 @@ class vBrowserWindow extends eBrowserWindow {
             // Some systems have trouble going 120 Hz, so we'll just take the lower
             // of the current pollingRate and 60 Hz.
             if (pollingRate !== undefined &&
-                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
+                currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
                 e.preventDefault();
                 return false;
             }
