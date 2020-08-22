@@ -31,29 +31,21 @@ function getHwnd(win) {
     }
 }
 
-function _setVibrancy(win, op = null) {
-    if (op && supportedType.indexOf(op) === -1 && op[0] !== '#') op = 'appearance-based';
-    if (op === 'appearance-based') {
-        if (nativeTheme.shouldUseDarkColors) op = 'dark';
-        else op = 'light';
-    }
-    let redValue, greenValue, blueValue, alphaValue;
-    if (op === 'light') op = _lightThemeColor;
-    else if (op === 'dark') op = _darkThemeColor;
-    if (op) redValue = parseInt(op.substring(1, 3), 16), greenValue = parseInt(op.substring(3, 5), 16), blueValue = parseInt(op.substring(5, 7), 16), alphaValue = parseInt(op.substring(7, 9), 16);
-    if (op) {
-        wSetVibrancy(getHwnd(win), isRS4OrGreater() ? 1 : 0, redValue, greenValue, blueValue, alphaValue);
+function _setVibrancy(win, vibrancyOp = null) {
+    if (vibrancyOp) {
+        let redValue = parseInt(vibrancyOp.theme.substring(1, 3), 16);
+        let greenValue = parseInt(vibrancyOp.theme.substring(3, 5), 16);
+        let blueValue = parseInt(vibrancyOp.theme.substring(5, 7), 16);
+        let alphaValue = parseInt(vibrancyOp.theme.substring(7, 9), 16);
+
+        wSetVibrancy(getHwnd(win), vibrancyOp.effect, redValue, greenValue, blueValue, alphaValue);
         win._vibrancyActivated = true;
         setTimeout(() => {
             if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
         }, 50);
     } else {
-        win._ignoreBlurFocusEvent = 2;
         win._vibrancyActivated = false;
-        let bOp = win._vibrancyOp;
-        if (bOp === 'light') bOp = _lightThemeColor;
-        else if (bOp === 'dark') bOp = _darkThemeColor;
-        win.setBackgroundColor('#99' + bOp.substring(1, 7));
+        win.setBackgroundColor('#99' + win._vibrancyOp.theme.substring(1, 7));
         setTimeout(() => {
             if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
         }, 10);
@@ -81,255 +73,284 @@ function findDesiredPosition(position, positionList) {
     return positionList.find(op => areBoundsEqual(position, op));
 }
 
+function opFormatter(vibrancyOp) {
+    if (!vibrancyOp) return null;
+    if (typeof vibrancyOp === 'string') vibrancyOp = {theme: vibrancyOp};
+    if (!('theme' in vibrancyOp)) vibrancyOp.theme = 'appearance-based';
+    if (!('effect' in vibrancyOp)) vibrancyOp.effect = 'acrylic';
+    if (!('useCustomWindowRefreshMethod' in vibrancyOp)) vibrancyOp.useCustomWindowRefreshMethod = true;
+    if (!('maximumRefreshRate' in vibrancyOp)) vibrancyOp.maximumRefreshRate = 60;
+    if (!('disableOnBlur' in vibrancyOp)) vibrancyOp.disableOnBlur = true;
+
+    if (vibrancyOp.theme && supportedType.indexOf(vibrancyOp.theme) === -1 && vibrancyOp.theme[0] !== '#') vibrancyOp.theme = 'appearance-based';
+    if (vibrancyOp.theme === 'appearance-based') {
+        if (nativeTheme.shouldUseDarkColors) vibrancyOp.theme = 'dark';
+        else vibrancyOp.theme = 'light';
+    }
+    if (vibrancyOp.theme === 'light') vibrancyOp.theme = _lightThemeColor;
+    else if (vibrancyOp.theme === 'dark') vibrancyOp.theme = _darkThemeColor;
+
+    if (vibrancyOp.effect === 'acrylic') {
+        if (isRS4OrGreater()) vibrancyOp.effect = 0;
+        else vibrancyOp.effect = 1;
+    } else vibrancyOp.effect = 1;
+
+    return vibrancyOp;
+}
+
 class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
         let oShow = props.show;
         if (!('show' in props)) oShow = true;
-        if (isWindows10() && props.vibrancy) {
-            let bOp = props.vibrancy;
-            if (bOp === 'light') bOp = _lightThemeColor;
-            else if (bOp === 'dark') bOp = _darkThemeColor;
-            props.backgroundColor = bOp.substring(0, 7);
+        let vibrancyOp = props.vibrancy;
+        if (isWindows10() && vibrancyOp) {
+            vibrancyOp = opFormatter(props.vibrancy);
+            props.vibrancy = null;
+            props.backgroundColor = vibrancyOp.theme.substring(0, 7);
             props.show = false;
         }
         const win = new eBrowserWindow(props);
         vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
-        win._vibrancyOp = props.vibrancy;
+        win._vibrancyOp = vibrancyOp;
+        win._vibrancyActivated = false;
 
-        // Unfortunately, we have to re-implement moving and resizing.
-        // Enabling vibrancy slows down the window's event handling loop to the
-        // point building a mouse event backlog. If you just handle these events
-        // in the backlog without taking the time difference into consideration,
-        // you end up with visible movement lag.
-        //
-        // We tried pairing 'will-move' with 'move', but Electron actually sends the
-        // 'move' events _before_ Windows actually commits to the operation. There's
-        // likely some queuing going on that's getting backed up. This is not the case
-        // with 'will-resize' and 'resize', which need to use the default behavior
-        // for compatibility with soft DPI scaling.
-        //
-        // The ideal rate of moving and resizing is based on the vertical sync
-        // rate: if your display is only fully updating at 120 Hz, we shouldn't
-        // be attempting to reset positions or sizes any faster than 120 Hz.
-        // If we were doing this in a browser context, we would just use
-        // requestAnimationFrame and call it a day. But we're not inside of a
-        // browser context here, so we have to resort to clever hacks.
-        //
-        // This VerticalRefreshRateContext maps a point in screen space to the
-        // vertical sync rate of the display(s) actually handing that point.
-        // It handles multiple displays with varying vertical sync rates,
-        // and changes to the display configuration while this process is running.
-        const refreshCtx = new VerticalRefreshRateContext();
+        if (vibrancyOp.useCustomWindowRefreshMethod) {
 
-        function getRefreshRateAtCursor(cursor) {
-            cursor = cursor || screen.getCursorScreenPoint();
-            return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y);
-        }
+            // Unfortunately, we have to re-implement moving and resizing.
+            // Enabling vibrancy slows down the window's event handling loop to the
+            // point building a mouse event backlog. If you just handle these events
+            // in the backlog without taking the time difference into consideration,
+            // you end up with visible movement lag.
+            //
+            // We tried pairing 'will-move' with 'move', but Electron actually sends the
+            // 'move' events _before_ Windows actually commits to the operation. There's
+            // likely some queuing going on that's getting backed up. This is not the case
+            // with 'will-resize' and 'resize', which need to use the default behavior
+            // for compatibility with soft DPI scaling.
+            //
+            // The ideal rate of moving and resizing is based on the vertical sync
+            // rate: if your display is only fully updating at 120 Hz, we shouldn't
+            // be attempting to reset positions or sizes any faster than 120 Hz.
+            // If we were doing this in a browser context, we would just use
+            // requestAnimationFrame and call it a day. But we're not inside of a
+            // browser context here, so we have to resort to clever hacks.
+            //
+            // This VerticalRefreshRateContext maps a point in screen space to the
+            // vertical sync rate of the display(s) actually handing that point.
+            // It handles multiple displays with varying vertical sync rates,
+            // and changes to the display configuration while this process is running.
+            const refreshCtx = new VerticalRefreshRateContext();
 
-        // Electron has a bad bug where it wants to ignore the very last will-move
-        // boundary set and revert to a slightly earlier one. We correct for this
-        // in the "move" event, but this correction is incompatible with Aero Snap.
-        // So to work around _that_, we're keeping a small record of the positions
-        // we wanted to set. If the bounds we have at the end of the move aren't
-        // at all what we said we wanted in the past, we just defer to what they are.
-        const desiredPositions = [];
-        function recordDesiredPosition(nextDesiredPosition) {
-            if (findDesiredPosition(nextDesiredPosition, desiredPositions)) return;
-            if (desiredPositions.length >= 5) {
-                desiredPositions.shift();
+            function getRefreshRateAtCursor(cursor) {
+                cursor = cursor || screen.getCursorScreenPoint();
+                return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y);
             }
-            desiredPositions.push(nextDesiredPosition);
-        }
 
-        // Ensure all movement operation is serialized, by setting up a continuous promise chain
-        // All movement operation will take the form of
-        //
-        //     boundsPromise = boundsPromise.then(() => { /* work */ })
-        //
-        // So that there are no asynchronous race conditions.
-        let pollingRate;
-        let doFollowUpQuery = false, isMoving = false, shouldMove = false;
-        let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
-        let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds;
-        let boundsPromise = Promise.race([
-            getRefreshRateAtCursor().then(rate => {
-                pollingRate = rate || 30;
-                doFollowUpQuery = true;
-            }),
-            // Establishing the display configuration can fail; we can't
-            // just block forever if that happens. Instead, establish
-            // a fallback polling rate and hope for the best.
-            sleep(2000).then(() => {
-                pollingRate = pollingRate || 30;
-            })
-        ]);
+            // Electron has a bad bug where it wants to ignore the very last will-move
+            // boundary set and revert to a slightly earlier one. We correct for this
+            // in the "move" event, but this correction is incompatible with Aero Snap.
+            // So to work around _that_, we're keeping a small record of the positions
+            // we wanted to set. If the bounds we have at the end of the move aren't
+            // at all what we said we wanted in the past, we just defer to what they are.
+            const desiredPositions = [];
 
-        async function doFollowUpQueryIfNecessary(cursor) {
-            if (doFollowUpQuery) {
-                const rate = await getRefreshRateAtCursor(cursor);
-                pollingRate = rate || 30;
+            function recordDesiredPosition(nextDesiredPosition) {
+                if (findDesiredPosition(nextDesiredPosition, desiredPositions)) return;
+                if (desiredPositions.length >= 5) {
+                    desiredPositions.shift();
+                }
+                desiredPositions.push(nextDesiredPosition);
             }
-        }
 
-        function setWindowBounds(bounds) {
-            if (win.isDestroyed()) {
-                return;
+            // Ensure all movement operation is serialized, by setting up a continuous promise chain
+            // All movement operation will take the form of
+            //
+            //     boundsPromise = boundsPromise.then(() => { /* work */ })
+            //
+            // So that there are no asynchronous race conditions.
+            let pollingRate;
+            let doFollowUpQuery = false, isMoving = false, shouldMove = false;
+            let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
+            let lastWillMoveBounds, lastWillResizeBounds, desiredMoveBounds;
+            let boundsPromise = Promise.race([
+                getRefreshRateAtCursor().then(rate => {
+                    pollingRate = rate || 30;
+                    doFollowUpQuery = true;
+                }),
+                // Establishing the display configuration can fail; we can't
+                // just block forever if that happens. Instead, establish
+                // a fallback polling rate and hope for the best.
+                sleep(2000).then(() => {
+                    pollingRate = pollingRate || 30;
+                })
+            ]);
+
+            async function doFollowUpQueryIfNecessary(cursor) {
+                if (doFollowUpQuery) {
+                    const rate = await getRefreshRateAtCursor(cursor);
+                    pollingRate = rate || 30;
+                }
             }
-            win.setBounds(bounds);
-            desiredMoveBounds = win.getBounds();
-            recordDesiredPosition(desiredMoveBounds);
-        }
 
-        function currentTimeBeforeNextActivityWindow(lastTime, forceFreq) {
-            return process.hrtime.bigint() <
-                lastTime + hrtimeDeltaForFrequency(forceFreq || pollingRate || 30);
-        }
-
-        function guardingAgainstMoveUpdate(fn) {
-            if (pollingRate === undefined || !currentTimeBeforeNextActivityWindow(moveLastUpdate)) {
-                moveLastUpdate = process.hrtime.bigint();
-                fn();
-                return true;
-            } else {
-                return false;
+            function setWindowBounds(bounds) {
+                if (win.isDestroyed()) {
+                    return;
+                }
+                win.setBounds(bounds);
+                desiredMoveBounds = win.getBounds();
+                recordDesiredPosition(desiredMoveBounds);
             }
-        }
 
-        win.on('will-move', (e, newBounds) => {
-            // We get a _lot_ of duplicate bounds sent to us in this event.
-            // This messes up our timing quite a bit.
-            if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
+            function currentTimeBeforeNextActivityWindow(lastTime, forceFreq) {
+                return process.hrtime.bigint() <
+                    lastTime + hrtimeDeltaForFrequency(forceFreq || pollingRate || 30);
+            }
+
+            function guardingAgainstMoveUpdate(fn) {
+                if (pollingRate === undefined || !currentTimeBeforeNextActivityWindow(moveLastUpdate)) {
+                    moveLastUpdate = process.hrtime.bigint();
+                    fn();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            win.on('will-move', (e, newBounds) => {
+                // We get a _lot_ of duplicate bounds sent to us in this event.
+                // This messes up our timing quite a bit.
+                if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
+                    e.preventDefault();
+                    return;
+                }
+                lastWillMoveBounds = newBounds;
+                // If we're asked to perform some move update and it's under
+                // the refresh speed limit, we can just do it immediately.
+                // This also catches moving windows with the keyboard.
+                const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => {
+                    // Do nothing, the default behavior of the event is exactly what we want.
+                    desiredMoveBounds = undefined;
+                });
+                if (didOptimisticMove) {
+                    boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
+                    return;
+                }
                 e.preventDefault();
-                return;
-            }
-            lastWillMoveBounds = newBounds;
-            // If we're asked to perform some move update and it's under
-            // the refresh speed limit, we can just do it immediately.
-            // This also catches moving windows with the keyboard.
-            const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => {
-                // Do nothing, the default behavior of the event is exactly what we want.
-                desiredMoveBounds = undefined;
-            });
-            if (didOptimisticMove) {
-                boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
-                return;
-            }
-            e.preventDefault();
 
-            // Track if the user is moving the window
-            if (win._moveTimeout) clearTimeout(win._moveTimeout);
-            win._moveTimeout = setTimeout(() => {
-                shouldMove = false;
-            }, 1000 / 60);
+                // Track if the user is moving the window
+                if (win._moveTimeout) clearTimeout(win._moveTimeout);
+                win._moveTimeout = setTimeout(() => {
+                    shouldMove = false;
+                }, 1000 / vibrancyOp.maximumRefreshRate);
 
-            // Start new behavior if not already
-            if (!shouldMove) {
-                shouldMove = true;
+                // Start new behavior if not already
+                if (!shouldMove) {
+                    shouldMove = true;
 
-                if (isMoving) return false;
-                isMoving = true;
+                    if (isMoving) return false;
+                    isMoving = true;
 
-                // Get start positions
-                const basisBounds = win.getBounds();
-                const basisCursor = screen.getCursorScreenPoint();
+                    // Get start positions
+                    const basisBounds = win.getBounds();
+                    const basisCursor = screen.getCursorScreenPoint();
 
-                // Handle polling at a slower interval than the setInterval handler
-                function handleIntervalTick(moveInterval) {
-                    boundsPromise = boundsPromise.then(() => {
-                        if (!shouldMove) {
-                            isMoving = false;
-                            clearInterval(moveInterval);
-                            return;
-                        }
+                    // Handle polling at a slower interval than the setInterval handler
+                    function handleIntervalTick(moveInterval) {
+                        boundsPromise = boundsPromise.then(() => {
+                            if (!shouldMove) {
+                                isMoving = false;
+                                clearInterval(moveInterval);
+                                return;
+                            }
 
-                        const cursor = screen.getCursorScreenPoint();
-                        const didIt = guardingAgainstMoveUpdate(() => {
-                            // Set new position
-                            setWindowBounds({
-                                x: basisBounds.x + (cursor.x - basisCursor.x),
-                                y: basisBounds.y + (cursor.y - basisCursor.y),
+                            const cursor = screen.getCursorScreenPoint();
+                            const didIt = guardingAgainstMoveUpdate(() => {
+                                // Set new position
+                                setWindowBounds({
+                                    x: basisBounds.x + (cursor.x - basisCursor.x),
+                                    y: basisBounds.y + (cursor.y - basisCursor.y),
+                                });
                             });
+                            if (didIt) {
+                                return doFollowUpQueryIfNecessary(cursor);
+                            }
                         });
-                        if (didIt) {
-                            return doFollowUpQueryIfNecessary(cursor);
-                        }
+                    }
+
+                    // Poll at 600hz while moving window
+                    const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
+                }
+            });
+
+            win.on('move', (e) => {
+                if (isMoving || win.isDestroyed()) {
+                    e.preventDefault();
+                    return false;
+                }
+                // The bounds we have now aren't in the bounds we ever requested.
+                // Something else managed this move, so we need to respect it.
+                if (!findDesiredPosition(win.getBounds(), desiredPositions)) return;
+                // As insane as this sounds, Electron sometimes reacts to prior
+                // move events out of order. Specifically, if you have win.setBounds()
+                // twice, then for some reason, when you exit the move state, the second
+                // call to win.setBounds() gets reverted to the first call to win.setBounds().
+                //
+                // Again, it's nuts. But what we can do in this circumstance is thwack the
+                // window back into place just to spite Electron. Yes, there's a shiver.
+                // No, there's not much we can do about it until Electron gets their act together.
+                if (desiredMoveBounds !== undefined) {
+                    const forceBounds = desiredMoveBounds;
+                    desiredMoveBounds = undefined;
+                    win.setBounds({
+                        x: forceBounds.x,
+                        y: forceBounds.y
                     });
                 }
+            });
 
-                // Poll at 600hz while moving window
-                const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
-            }
-        });
+            win.on('will-resize', (e, newBounds) => {
+                if (lastWillResizeBounds !== undefined && areBoundsEqual(lastWillResizeBounds, newBounds)) {
+                    e.preventDefault();
+                    return;
+                }
 
-        win.on('move', (e) => {
-            if (isMoving || win.isDestroyed()) {
-                e.preventDefault();
-                return false;
-            }
-            // The bounds we have now aren't in the bounds we ever requested.
-            // Something else managed this move, so we need to respect it.
-            if (!findDesiredPosition(win.getBounds(), desiredPositions)) return;
-            // As insane as this sounds, Electron sometimes reacts to prior
-            // move events out of order. Specifically, if you have win.setBounds()
-            // twice, then for some reason, when you exit the move state, the second
-            // call to win.setBounds() gets reverted to the first call to win.setBounds().
-            //
-            // Again, it's nuts. But what we can do in this circumstance is thwack the
-            // window back into place just to spite Electron. Yes, there's a shiver.
-            // No, there's not much we can do about it until Electron gets their act together.
-            if (desiredMoveBounds !== undefined) {
-                const forceBounds = desiredMoveBounds;
-                desiredMoveBounds = undefined;
-                win.setBounds({
-                    x: forceBounds.x,
-                    y: forceBounds.y
-                });
-            }
-        });
+                lastWillResizeBounds = newBounds;
 
-        win.on('will-resize', (e, newBounds) => {
-            if (lastWillResizeBounds !== undefined && areBoundsEqual(lastWillResizeBounds, newBounds)) {
-                e.preventDefault();
-                return;
-            }
+                if (pollingRate !== undefined &&
+                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, vibrancyOp.maximumRefreshRate))) {
+                    e.preventDefault();
+                    return false;
+                }
+                // We have to count this twice: once before the resize,
+                // and once after the resize. We actually don't have any
+                // timing control around _when_ the resize happened, so
+                // we have to be pessimistic.
+                resizeLastUpdate = process.hrtime.bigint();
+            });
 
-            lastWillResizeBounds = newBounds;
+            win.on('resize', () => {
+                resizeLastUpdate = process.hrtime.bigint();
+                boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
+            });
 
-            // 60 Hz ought to be enough... for resizes.
-            // Some systems have trouble going 120 Hz, so we'll just take the lower
-            // of the current pollingRate and 60 Hz.
-            if (pollingRate !== undefined &&
-                currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
-                e.preventDefault();
-                return false;
-            }
-            // We have to count this twice: once before the resize,
-            // and once after the resize. We actually don't have any
-            // timing control around _when_ the resize happened, so
-            // we have to be pessimistic.
-            resizeLastUpdate = process.hrtime.bigint();
-        });
+            // Close the VerticalRefreshRateContext so Node can exit cleanly
+            win.on('closed', refreshCtx.close);
+        }
 
-        win.on('resize', () => {
-            resizeLastUpdate = process.hrtime.bigint();
-            boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary);
-        });
+        if (vibrancyOp.disableOnBlur) {
+            win.on('blur', () => {
+                if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
+            })
 
-        // Close the VerticalRefreshRateContext so Node can exit cleanly
-        win.on('closed', refreshCtx.close);
-
-        win.on('blur', () => {
-            if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
-        })
-
-        win.on('focus', () => {
-            if (isWindows10() && win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
-        })
+            win.on('focus', () => {
+                if (isWindows10() && win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
+            })
+        }
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
             setTimeout(() => {
                 if (oShow) win.show();
-                win.setVibrancy(props.vibrancy);
+                win.setVibrancy(win._vibrancyOp);
             }, 100);
         });
 
@@ -337,7 +358,7 @@ class vBrowserWindow extends eBrowserWindow {
     }
 
     static setVibrancy(op = null) {
-        this._vibrancyOp = op;
+        this._vibrancyOp = opFormatter(op);
         if (!isWindows10()) super.setVibrancy(op);
         else {
             if (op) _setVibrancy(this, null);
@@ -354,7 +375,7 @@ class vBrowserWindow extends eBrowserWindow {
 }
 
 function setVibrancy(win, op = 'appearance-based') {
-    win._vibrancyOp = op;
+    win._vibrancyOp = opFormatter(op);
     if (!isWindows10()) win.setVibrancy(op);
     else {
         if (op) _setVibrancy(this, null);
@@ -362,10 +383,5 @@ function setVibrancy(win, op = 'appearance-based') {
     }
 }
 
-function disableVibrancy(win) {
-    setVibrancy(win, null);
-}
-
 exports.setVibrancy = setVibrancy;
-exports.disableVibrancy = disableVibrancy;
 exports.BrowserWindow = vBrowserWindow;

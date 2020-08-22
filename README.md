@@ -49,8 +49,38 @@ setVibrancy(win, op = null);
     - There is no return value. If it fails to set vibrancy, it throws error.  
 ```win``` should be frameLess, and transparent.  
     - This function will call ```win.setVibrancy(op)``` if os is not Windows 10.  
-On Windows 10, op should be 'light', 'dark', 'appearance-based' or a hex colour code with alpha.  
-If not, it'll set as 'appearance-based'.
+On Windows 10, op should be String or Object.
+ * String
+    op should be 'light', 'dark', 'appearance-based' or a hex colour code with alpha.  
+    If not, it'll be set up as 'appearance-based'.
+ * Object
+    ```javascript
+    op = {
+       theme: String ( = 'appearance-based'),
+       effect: String ( = 'acrylic'),
+       useCustomWindowRefreshMethod: Boolean ( = true),
+       maximumRefreshRate: Number ( = 60),
+       disableOnBlur: Boolean ( = true)
+    }   
+   ```
+   * theme  
+        theme sets color of acrylic effect
+        theme should be 'light', 'dark', 'appearance-based' or a hex colour code with alpha.
+        If not, it'll be set up as 'appearance-based'.
+   * effect  
+        effect sets method of Acrylic blur.
+        effect should be 'acrylic' or 'blur'.  
+        **Setting this option to acrylic may cause performance degradation.**  
+        **If the version of the window is RS3 or lower, the 'blur' is forced.**
+   * useCustomWindowRefreshMethod  
+        Use custom window resize/move handler for performance.
+        Special thanks to @djsweet and @xanderfrangos.  
+        **This is experimental option. It can cause unintentional error.**
+   * maximumRefreshRate  
+        Maximum value to refresh application screen in second.  
+   * disableOnBlur 
+        If true, acrylic effect will be disabled when window blurred.
+    
 
 - **Errors**
     - WINDOW_NOT_GIVEN  
@@ -59,28 +89,6 @@ If not, it'll set as 'appearance-based'.
         - Error that occurs when ```win``` parameter is not valid Electron window.
     - FAIL_LOAD_DLL  
         - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
-    - UNKNOWN  
-        - Unknown error.
-
-### ~~`disableVibrancy`~~ (Depreciated)
-- **will be removed on v1.0.0.**
-
-```javascript
-disableVibrancy(win);
-```
-
-- Disables Vibrancy to window.  
-    - There is no return value. If it fails to disable vibrancy, it throws error.  
-    - ```win``` should be frameless, and transparent.
-This function will call ```win.setVibrancy(null)``` if os is not Windows 10.  
-
-- **Errors**
-    - WINDOW_NOT_GIVEN  
-        - Error that occurs when ```win``` parameter is not passed.
-    - NOT_VALID_WINDOW   
-        - Error that occurs when ```win``` parameter is not valid Electron window.
-    - FAIL_LOAD_DLL   
-        - Error that occurs when fails to load binary module.
     - UNKNOWN  
         - Unknown error.
 
