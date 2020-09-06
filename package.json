@@ -19,7 +19,7 @@
   "scripts": {
     "build": "node-gyp rebuild",
     "install": "node-gyp rebuild",
-    "test": "npm run-script build && electron test/test.js"
+    "test": "electron test/test.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,6 @@
     "win32-displayconfig": "^0.1.0"
   },
   "devDependencies": {
-    "electron": "^9.2.1"
+    "electron": "^10.1.1"
   }
 }
