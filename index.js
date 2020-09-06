@@ -1,11 +1,13 @@
-const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require("bindings")("vibrancy-wrapper");
+const { setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy } = require("bindings")("vibrancy-wrapper");
 const os = require("os");
 const eBrowserWindow = require("electron").BrowserWindow;
-const {nativeTheme, screen} = require("electron");
-const {VerticalRefreshRateContext} = require("win32-displayconfig");
+const { nativeTheme, screen } = require("electron");
+const { VerticalRefreshRateContext } = require("win32-displayconfig");
 const supportedType = ['light', 'dark', 'appearance-based'];
 
 const _lightThemeColor = '#FFFFFF40', _darkThemeColor = '#44444480';
+
+let _vibrancyDebug = false;
 
 function isWindows10() {
     if (process.platform !== 'win32') return false;
@@ -32,20 +34,18 @@ function getHwnd(win) {
 }
 
 function _setVibrancy(win, vibrancyOp = null) {
-    if (vibrancyOp) {
-        let redValue = parseInt(vibrancyOp.theme.substring(1, 3), 16);
-        let greenValue = parseInt(vibrancyOp.theme.substring(3, 5), 16);
-        let blueValue = parseInt(vibrancyOp.theme.substring(5, 7), 16);
-        let alphaValue = parseInt(vibrancyOp.theme.substring(7, 9), 16);
-
-        wSetVibrancy(getHwnd(win), vibrancyOp.effect, redValue, greenValue, blueValue, alphaValue);
+    if (vibrancyOp && vibrancyOp.colors) {
+        if(_vibrancyDebug) console.log("Vibrancy On", vibrancyOp)
+        wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, vibrancyOp.colors.a);
         win._vibrancyActivated = true;
         setTimeout(() => {
             if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
         }, 50);
     } else {
+        if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp)
         win._vibrancyActivated = false;
-        win.setBackgroundColor('#99' + win._vibrancyOp.theme.substring(1, 7));
+        if (win._vibrancyOp)
+            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? win._vibrancyOp.colors.blur.substring(0,7) : "#000000"));
         setTimeout(() => {
             if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
         }, 10);
@@ -74,35 +74,60 @@ let disableJitterFix = false
 function isInSnapZone() {
     const point = screen.getCursorScreenPoint()
     const display = screen.getDisplayNearestPoint(point)
-    
+
     // Check if cursor is near the left/right edge of the active display
-    if((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
+    if ((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
         return true
     }
     return false
 }
 
-function opFormatter(vibrancyOp) {
-    if (!vibrancyOp) return null;
-    if (typeof vibrancyOp === 'string') vibrancyOp = {theme: vibrancyOp};
-    if (!('theme' in vibrancyOp)) vibrancyOp.theme = 'appearance-based';
-    if (!('effect' in vibrancyOp)) vibrancyOp.effect = 'acrylic';
-    if (!('useCustomWindowRefreshMethod' in vibrancyOp)) vibrancyOp.useCustomWindowRefreshMethod = true;
-    if (!('maximumRefreshRate' in vibrancyOp)) vibrancyOp.maximumRefreshRate = 60;
-    if (!('disableOnBlur' in vibrancyOp)) vibrancyOp.disableOnBlur = true;
+function opFormatter(vibrancyProps) {
 
+    const defaultSettings = {
+        theme: false,
+        effect: 'acrylic',
+        useCustomWindowRefreshMethod: true,
+        maximumRefreshRate: 60,
+        disableOnBlur: true,
+        debug: false
+    }
+
+    // Merge provided settings into defaults
+    let vibrancyOp = Object.assign(defaultSettings, (typeof vibrancyProps === "object" ? vibrancyProps : { theme: vibrancyProps }))
+
+    // Detect appropriate theme if 'appearance-based'
     if (vibrancyOp.theme && supportedType.indexOf(vibrancyOp.theme) === -1 && vibrancyOp.theme[0] !== '#') vibrancyOp.theme = 'appearance-based';
     if (vibrancyOp.theme === 'appearance-based') {
         if (nativeTheme.shouldUseDarkColors) vibrancyOp.theme = 'dark';
         else vibrancyOp.theme = 'light';
     }
+
+    // Use default 'light' or 'dark' themes, if requested
     if (vibrancyOp.theme === 'light') vibrancyOp.theme = _lightThemeColor;
     else if (vibrancyOp.theme === 'dark') vibrancyOp.theme = _darkThemeColor;
 
-    if (vibrancyOp.effect === 'acrylic') {
-        if (isRS4OrGreater()) vibrancyOp.effect = 0;
-        else vibrancyOp.effect = 1;
-    } else vibrancyOp.effect = 1;
+    // Set blur type
+    if (vibrancyOp.effect === 'acrylic' || vibrancyOp.effect === 1) {
+        if (isRS4OrGreater()) vibrancyOp.effect = 1;
+        else vibrancyOp.effect = 0;
+    } else vibrancyOp.effect = 0;
+
+    // Pre-calculate color values, if possible
+    try {
+        vibrancyOp.colors = (!vibrancyOp.theme ? false : {
+            base: vibrancyOp.theme,
+            r: parseInt(vibrancyOp.theme.substring(1, 3), 16),
+            g: parseInt(vibrancyOp.theme.substring(3, 5), 16),
+            b: parseInt(vibrancyOp.theme.substring(5, 7), 16),
+            a: parseInt(vibrancyOp.theme.substring(7, 9), 16),
+            blur: "#" + vibrancyOp.theme.substring(1, 7) + "FF",
+            focus: vibrancyOp.theme
+        })
+    } catch(e) { }
+    
+    // Debug output
+    if (_vibrancyDebug) console.log(vibrancyOp)
 
     return vibrancyOp;
 }
@@ -111,11 +136,12 @@ class vBrowserWindow extends eBrowserWindow {
     constructor(props) {
         let oShow = props.show;
         if (!('show' in props)) oShow = true;
-        let vibrancyOp = props.vibrancy;
+        if (props.vibrancy && props.vibrancy.debug) _vibrancyDebug = true;
+        let vibrancyOp = opFormatter(props.vibrancy);
         if (isWindows10() && vibrancyOp) {
-            vibrancyOp = opFormatter(props.vibrancy);
             props.vibrancy = null;
-            props.backgroundColor = vibrancyOp.theme.substring(0, 7);
+            if(vibrancyOp.theme)
+                props.backgroundColor = (vibrancyOp.colors ? vibrancyOp.colors.base.substring(0, 7) : false);
             props.show = false;
         }
         const win = new eBrowserWindow(props);
@@ -123,7 +149,7 @@ class vBrowserWindow extends eBrowserWindow {
         win._vibrancyOp = vibrancyOp;
         win._vibrancyActivated = false;
 
-        if (vibrancyOp.useCustomWindowRefreshMethod) {
+        if (vibrancyOp && vibrancyOp.useCustomWindowRefreshMethod) {
 
             // Unfortunately, we have to re-implement moving and resizing.
             // Enabling vibrancy slows down the window's event handling loop to the
@@ -233,7 +259,7 @@ class vBrowserWindow extends eBrowserWindow {
                 if (win._moveTimeout) clearTimeout(win._moveTimeout);
                 win._moveTimeout = setTimeout(() => {
                     shouldMove = false;
-                }, 1000 / vibrancyOp.maximumRefreshRate);
+                }, 1000 / Math.min(pollingRate, vibrancyOp.maximumRefreshRate));
 
                 // Disable next event ('move') if cursor is near the screen edge
                 disableJitterFix = isInSnapZone()
@@ -278,7 +304,7 @@ class vBrowserWindow extends eBrowserWindow {
             });
 
             win.on('move', (e) => {
-                if(disableJitterFix) {
+                if (disableJitterFix) {
                     return true;
                 }
                 if (isMoving || win.isDestroyed()) {
@@ -311,8 +337,11 @@ class vBrowserWindow extends eBrowserWindow {
 
                 lastWillResizeBounds = newBounds;
 
+                // 60 Hz ought to be enough... for resizes.
+                // Some systems have trouble going 120 Hz, so we'll just take the lower
+                // of the current pollingRate and 60 Hz.
                 if (pollingRate !== undefined &&
-                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, vibrancyOp.maximumRefreshRate))) {
+                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
                     e.preventDefault();
                     return false;
                 }
@@ -332,7 +361,7 @@ class vBrowserWindow extends eBrowserWindow {
             win.on('closed', refreshCtx.close);
         }
 
-        if (vibrancyOp.disableOnBlur) {
+        if (vibrancyOp && vibrancyOp.disableOnBlur) {
             win.on('blur', () => {
                 if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
             })
@@ -354,10 +383,10 @@ class vBrowserWindow extends eBrowserWindow {
 
     static setVibrancy(op = null) {
         this._vibrancyOp = opFormatter(op);
-        if (!isWindows10()) super.setVibrancy(op);
+        if (!isWindows10()) super.setVibrancy(this._vibrancyOp);
         else {
-            if (op) _setVibrancy(this, null);
-            _setVibrancy(this, op);
+            if (!op) _setVibrancy(this, null);
+            else _setVibrancy(this, this._vibrancyOp);
         }
     }
 
@@ -371,10 +400,10 @@ class vBrowserWindow extends eBrowserWindow {
 
 function setVibrancy(win, op = 'appearance-based') {
     win._vibrancyOp = opFormatter(op);
-    if (!isWindows10()) win.setVibrancy(op);
+    if (!isWindows10()) win.setVibrancy(win._vibrancyOp);
     else {
-        if (op) _setVibrancy(this, null);
-        else _setVibrancy(this, op);
+        if (!op) _setVibrancy(this, null);
+        else _setVibrancy(this, win._vibrancyOp);
     }
 }
 
