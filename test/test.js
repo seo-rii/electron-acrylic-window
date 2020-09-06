@@ -8,14 +8,15 @@ function createWindow() {
         width: 800,
         height: 600,
         frame: false,
+        transparent: true,
         webPreferences: {
-            nodeIntegration: true
+            nodeIntegration: true,
+            enableRemoteModule: true
         },
         vibrancy: {
-            theme: '#ffffff66',
-            useCustomWindowRefreshMethod: true,
-            maximumRefreshRate: 60,
-            disableOnBlur: false
+            theme: '#12abcd99',
+            disableOnBlur: false,
+            debug: true
         }
     });
     win.loadURL(`file://${__dirname}/test.html`);

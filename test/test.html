@@ -10,7 +10,7 @@
 <header id="titlebar">
     <div id="drag-region">
         <div id="window-title">
-            <span id="appTitle">Test Application</span>
+            <span id="appTitle">Acrylic Test Application</span>
         </div>
         <div id="window-controls">
             <div class="button" id="min-button">
@@ -28,8 +28,45 @@
         </div>
     </div>
 </header>
-<main>
-    <h1>Test Application!</h1>
+<main style="padding: 20px;">
+    <h1>Acrylic Test Application</h1>
+    <form id="form">
+        <input id="color" value="#12abcd99">
+        <input onclick="window.updateColor()" type="button" value="Update Color" />
+        <input onclick="window.toggleAcrylic()" type="button" value="Toggle Acrylic" />
+        <p>Format: #RRGGBBAA</p>
+    </form>
 </main>
+<style>
+    input {
+        padding: 10px;
+    }
+    h1 {
+        color: white;
+    }
+    p {
+        color: white;
+        opacity: 0.85;
+        font-size: 13px;
+        font-style: italic;
+    }
+</style>
+<script>
+    window.updateColor = () => {
+        window.updateVibrancy(document.getElementById("color").value)
+    }
+    window.toggleAcrylic = () => {
+        if(win._vibrancyOp.theme) {
+            window.updateVibrancy()
+        } else {
+            window.updateVibrancy(document.getElementById("color").value)
+        }
+    }
+    document.getElementById("form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        window.updateColor();
+        return false;
+    })
+</script>
 </body>
 </html>
