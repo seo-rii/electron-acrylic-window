@@ -69,8 +69,17 @@ function hrtimeDeltaForFrequency(freq) {
     return BigInt(Math.ceil(billion / freq));
 }
 
-function findDesiredPosition(position, positionList) {
-    return positionList.find(op => areBoundsEqual(position, op));
+let disableJitterFix = false
+// Detect if cursor is near the screen edge. Used to disable the jitter fix in 'move' event.
+function isInSnapZone() {
+    const point = screen.getCursorScreenPoint()
+    const display = screen.getDisplayNearestPoint(point)
+    
+    // Check if cursor is near the left/right edge of the active display
+    if((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
+        return true
+    }
+    return false
 }
 
 function opFormatter(vibrancyOp) {
@@ -146,22 +155,6 @@ class vBrowserWindow extends eBrowserWindow {
                 return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y);
             }
 
-            // Electron has a bad bug where it wants to ignore the very last will-move
-            // boundary set and revert to a slightly earlier one. We correct for this
-            // in the "move" event, but this correction is incompatible with Aero Snap.
-            // So to work around _that_, we're keeping a small record of the positions
-            // we wanted to set. If the bounds we have at the end of the move aren't
-            // at all what we said we wanted in the past, we just defer to what they are.
-            const desiredPositions = [];
-
-            function recordDesiredPosition(nextDesiredPosition) {
-                if (findDesiredPosition(nextDesiredPosition, desiredPositions)) return;
-                if (desiredPositions.length >= 5) {
-                    desiredPositions.shift();
-                }
-                desiredPositions.push(nextDesiredPosition);
-            }
-
             // Ensure all movement operation is serialized, by setting up a continuous promise chain
             // All movement operation will take the form of
             //
@@ -198,7 +191,6 @@ class vBrowserWindow extends eBrowserWindow {
                 }
                 win.setBounds(bounds);
                 desiredMoveBounds = win.getBounds();
-                recordDesiredPosition(desiredMoveBounds);
             }
 
             function currentTimeBeforeNextActivityWindow(lastTime, forceFreq) {
@@ -243,6 +235,9 @@ class vBrowserWindow extends eBrowserWindow {
                     shouldMove = false;
                 }, 1000 / vibrancyOp.maximumRefreshRate);
 
+                // Disable next event ('move') if cursor is near the screen edge
+                disableJitterFix = isInSnapZone()
+
                 // Start new behavior if not already
                 if (!shouldMove) {
                     shouldMove = true;
@@ -283,13 +278,13 @@ class vBrowserWindow extends eBrowserWindow {
             });
 
             win.on('move', (e) => {
+                if(disableJitterFix) {
+                    return true;
+                }
                 if (isMoving || win.isDestroyed()) {
                     e.preventDefault();
                     return false;
                 }
-                // The bounds we have now aren't in the bounds we ever requested.
-                // Something else managed this move, so we need to respect it.
-                if (!findDesiredPosition(win.getBounds(), desiredPositions)) return;
                 // As insane as this sounds, Electron sometimes reacts to prior
                 // move events out of order. Specifically, if you have win.setBounds()
                 // twice, then for some reason, when you exit the move state, the second
