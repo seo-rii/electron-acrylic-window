@@ -38,6 +38,13 @@
     </form>
 </main>
 <style>
+    html {
+        width: 100%;
+        height: 100%;
+        --window-border: #222;
+        border: 1px solid var(--window-border);
+        box-sizing: border-box;
+    }
     input {
         padding: 10px;
     }
@@ -53,7 +60,9 @@
 </style>
 <script>
     window.updateColor = () => {
-        window.updateVibrancy(document.getElementById("color").value)
+        const color = document.getElementById("color").value
+        window.updateVibrancy(color)
+        window.document.querySelector("html").style.setProperty("--window-border", color.substring(0,7))
     }
     window.toggleAcrylic = () => {
         if(win._vibrancyOp.theme) {
