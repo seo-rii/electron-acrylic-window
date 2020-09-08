@@ -31,7 +31,7 @@ npm i electron-acrylic-window --save
 win = new BrowserWindow({
     ...,
     frame: false,
-    vibrancy: 'dark' // 'dark', 'light', 'appearance-based', or hex colour code with alpha '#ffff0066'
+    vibrancy: 'dark' // 'dark', 'light', 'appearance-based', hex colour code with alpha '#ffff0066', or Object below
 });
 ```
 
@@ -79,7 +79,7 @@ On Windows 10, op should be String or Object.
    * maximumRefreshRate  
         Maximum value to refresh application screen in second.  
    * disableOnBlur   
-        If true, acrylic effect will be disabled when window blurred.
+        If true, acrylic effect will be disabled when window lost focus.
     
 
 - **Errors**

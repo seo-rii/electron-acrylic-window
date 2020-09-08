@@ -15,8 +15,11 @@ function createWindow() {
             enableRemoteModule: true
         },
         vibrancy: {
-            theme: '#12abcd99',
-            disableOnBlur: false,
+            theme: 'white',
+            effect: 'acrylic',
+            useCustomWindowRefreshMethod: true,
+            maximumRefreshRate: 60,
+            disableOnBlur: true,
             debug: true
         }
     });

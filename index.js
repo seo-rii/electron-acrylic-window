@@ -39,7 +39,11 @@ function _setVibrancy(win, vibrancyOp = null) {
         wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, vibrancyOp.colors.a);
         win._vibrancyActivated = true;
         setTimeout(() => {
-            if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+            try {
+                if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+            } catch (e) {
+
+            }
         }, 50);
     } else {
         if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp)
@@ -70,6 +74,7 @@ function hrtimeDeltaForFrequency(freq) {
 }
 
 let disableJitterFix = false
+
 // Detect if cursor is near the screen edge. Used to disable the jitter fix in 'move' event.
 function isInSnapZone() {
     const point = screen.getCursorScreenPoint()
@@ -290,6 +295,8 @@ class vBrowserWindow extends eBrowserWindow {
                                 setWindowBounds({
                                     x: basisBounds.x + (cursor.x - basisCursor.x),
                                     y: basisBounds.y + (cursor.y - basisCursor.y),
+                                    width: basisBounds.width,
+                                    height: basisBounds.height
                                 });
                             });
                             if (didIt) {
@@ -324,7 +331,9 @@ class vBrowserWindow extends eBrowserWindow {
                     desiredMoveBounds = undefined;
                     win.setBounds({
                         x: forceBounds.x,
-                        y: forceBounds.y
+                        y: forceBounds.y,
+                        width: forceBounds.width,
+                        height: forceBounds.height
                     });
                 }
             });
