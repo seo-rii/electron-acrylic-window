@@ -341,7 +341,7 @@ class vBrowserWindow extends eBrowserWindow {
             win.on('closed', refreshCtx.close);
         }
 
-        if (vibrancyOp.disableOnBlur) {
+        if (vibrancyOp && 'disableOnBlur' in vibrancyOp && vibrancyOp.disableOnBlur) {
             win.on('blur', () => {
                 if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
             })

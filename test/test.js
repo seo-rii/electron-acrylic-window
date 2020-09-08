@@ -10,12 +10,6 @@ function createWindow() {
         frame: false,
         webPreferences: {
             nodeIntegration: true
-        },
-        vibrancy: {
-            theme: '#ffffff66',
-            useCustomWindowRefreshMethod: true,
-            maximumRefreshRate: 60,
-            disableOnBlur: false
         }
     });
     win.loadURL(`file://${__dirname}/test.html`);
