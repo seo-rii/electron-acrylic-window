@@ -128,7 +128,7 @@ class vBrowserWindow extends eBrowserWindow {
         win._vibrancyOp = vibrancyOp;
         win._vibrancyActivated = false;
 
-        if (vibrancyOp.useCustomWindowRefreshMethod) {
+        if (vibrancyOp && 'useCustomWindowRefreshMethod' in vibrancyOp && vibrancyOp.useCustomWindowRefreshMethod) {
 
             // Unfortunately, we have to re-implement moving and resizing.
             // Enabling vibrancy slows down the window's event handling loop to the

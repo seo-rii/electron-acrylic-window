@@ -31,7 +31,7 @@ npm i electron-acrylic-window --save
 win = new BrowserWindow({
     ...,
     frame: false,
-    vibrancy: 'dark' // 'dark', 'light', 'appearance-based', or hex colour code with alpha '#ffff0066'
+    vibrancy: 'dark' // 'dark', 'light', 'appearance-based', hex colour code with alpha '#ffff0066', or Object below
 });
 ```
 
