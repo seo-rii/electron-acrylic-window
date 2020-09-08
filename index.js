@@ -41,7 +41,11 @@ function _setVibrancy(win, vibrancyOp = null) {
         wSetVibrancy(getHwnd(win), vibrancyOp.effect, redValue, greenValue, blueValue, alphaValue);
         win._vibrancyActivated = true;
         setTimeout(() => {
-            if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+            try {
+                if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+            } catch (e) {
+
+            }
         }, 50);
     } else {
         win._vibrancyActivated = false;
@@ -70,13 +74,14 @@ function hrtimeDeltaForFrequency(freq) {
 }
 
 let disableJitterFix = false
+
 // Detect if cursor is near the screen edge. Used to disable the jitter fix in 'move' event.
 function isInSnapZone() {
     const point = screen.getCursorScreenPoint()
     const display = screen.getDisplayNearestPoint(point)
-    
+
     // Check if cursor is near the left/right edge of the active display
-    if((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
+    if ((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
         return true
     }
     return false
@@ -264,6 +269,8 @@ class vBrowserWindow extends eBrowserWindow {
                                 setWindowBounds({
                                     x: basisBounds.x + (cursor.x - basisCursor.x),
                                     y: basisBounds.y + (cursor.y - basisCursor.y),
+                                    width: basisBounds.width,
+                                    height: basisBounds.height
                                 });
                             });
                             if (didIt) {
@@ -278,7 +285,7 @@ class vBrowserWindow extends eBrowserWindow {
             });
 
             win.on('move', (e) => {
-                if(disableJitterFix) {
+                if (disableJitterFix) {
                     return true;
                 }
                 if (isMoving || win.isDestroyed()) {
@@ -298,7 +305,9 @@ class vBrowserWindow extends eBrowserWindow {
                     desiredMoveBounds = undefined;
                     win.setBounds({
                         x: forceBounds.x,
-                        y: forceBounds.y
+                        y: forceBounds.y,
+                        width: forceBounds.width,
+                        height: forceBounds.height
                     });
                 }
             });
