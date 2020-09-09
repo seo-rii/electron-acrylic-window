@@ -94,7 +94,7 @@ function opFormatter(vibrancyProps) {
         theme: false,
         effect: 'acrylic',
         useCustomWindowRefreshMethod: true,
-        maximumRefreshRate: 60,
+        maximumRefreshRate: 1000,
         disableOnBlur: true,
         debug: false
     }
