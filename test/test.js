@@ -15,10 +15,9 @@ function createWindow() {
             enableRemoteModule: true
         },
         vibrancy: {
-            theme: 'white',
+            theme: '#661237cc',
             effect: 'acrylic',
             useCustomWindowRefreshMethod: true,
-            maximumRefreshRate: 60,
             disableOnBlur: true,
             debug: true
         }

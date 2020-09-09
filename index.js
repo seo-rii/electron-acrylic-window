@@ -213,6 +213,7 @@ class vBrowserWindow extends eBrowserWindow {
             async function doFollowUpQueryIfNecessary(cursor) {
                 if (doFollowUpQuery) {
                     const rate = await getRefreshRateAtCursor(cursor);
+                    if(_vibrancyDebug && rate != pollingRate) console.log(`New polling rate: ${rate}`)
                     pollingRate = rate || 30;
                 }
             }
