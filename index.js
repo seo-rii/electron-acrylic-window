@@ -46,10 +46,11 @@ function _setVibrancy(win, vibrancyOp = null) {
             }
         }, 50);
     } else {
-        if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp)
+        if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp, win._vibrancyOp)
         win._vibrancyActivated = false;
-        if (win._vibrancyOp)
-            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? win._vibrancyOp.colors.blur.substring(0,7) : "#000000"));
+        if (win._vibrancyOp) {
+            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors && win._vibrancyOp.colors.blur ? "#FE" + win._vibrancyOp.colors.blur.substring(1,7) : "#000000"));
+        }
         setTimeout(() => {
             if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
         }, 10);
@@ -391,12 +392,19 @@ class vBrowserWindow extends eBrowserWindow {
     }
 
     static setVibrancy(op = null) {
-        this._vibrancyOp = opFormatter(op);
-        if (!isWindows10()) super.setVibrancy(this._vibrancyOp);
-        else {
-            if (!op) _setVibrancy(this, null);
-            else _setVibrancy(this, this._vibrancyOp);
+        if(!op) {
+            // If disabling vibrancy, turn off then save
+            _setVibrancy(this, null)
+            this._vibrancyOp = opFormatter(op);
+        } else {
+            this._vibrancyOp = opFormatter(op);
+            if (!isWindows10()) super.setVibrancy(this._vibrancyOp);
+            else {
+                if (!op) _setVibrancy(this, null);
+                else _setVibrancy(this, this._vibrancyOp);
+            }
         }
+        
     }
 
     static _bindAndReplace(object, method) {
@@ -408,11 +416,17 @@ class vBrowserWindow extends eBrowserWindow {
 }
 
 function setVibrancy(win, op = 'appearance-based') {
-    win._vibrancyOp = opFormatter(op);
-    if (!isWindows10()) win.setVibrancy(win._vibrancyOp);
-    else {
-        if (!op) _setVibrancy(this, null);
-        else _setVibrancy(this, win._vibrancyOp);
+    // If disabling vibrancy, turn off then save
+    if(!op) {
+        _setVibrancy(this, null);
+        win._vibrancyOp = opFormatter(op);
+    } else {
+        win._vibrancyOp = opFormatter(op);
+        if (!isWindows10()) win.setVibrancy(win._vibrancyOp);
+        else {
+            if (!op) _setVibrancy(this, null);
+            else _setVibrancy(this, win._vibrancyOp);
+        }
     }
 }
 
