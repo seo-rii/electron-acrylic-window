@@ -8,8 +8,6 @@ function createWindow() {
         width: 800,
         height: 600,
         frame: false,
-        backgroundColor: "#00000000",
-        resizable: true,
         webPreferences: {
             nodeIntegration: true,
             enableRemoteModule: true

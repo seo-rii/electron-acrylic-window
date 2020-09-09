@@ -5,7 +5,7 @@ const { nativeTheme, screen } = require("electron");
 const { VerticalRefreshRateContext } = require("win32-displayconfig");
 const supportedType = ['light', 'dark', 'appearance-based'];
 
-const _lightThemeColor = '#FFFFFF40', _darkThemeColor = '#44444480';
+const _lightThemeColor = '#DDDDDD80', _darkThemeColor = '#22222280';
 
 let _vibrancyDebug = false;
 
