@@ -12,6 +12,10 @@
 
 html {
     box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    --window-border: #222;
+    box-shadow: 0 0 0 1px var(--window-border) inset;
 }
 
 *, *:before, *:after {
@@ -25,7 +29,7 @@ html, body {
 }
 
 body {
-    font-family: system-ui
+    font-family: system-ui;
 }
 
 h1 {
@@ -181,4 +185,65 @@ body {
 
 main {
     margin-top: 32px;
+}
+
+input {
+    padding: 10px;
+}
+
+h1 {
+    color: white;
+}
+
+p {
+    color: white;
+    opacity: 0.85;
+    font-size: 13px;
+    font-style: italic;
+}
+
+input[type=button] {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    width: fit-content;
+    outline: none;
+    background: #999;
+}
+
+input[type=button]:hover {
+    box-shadow: 0 0 0 3px #ccc inset;
+}
+
+input[type=button]:active {
+    box-shadow: none !important;
+    animation: clickItem 0.5s;
+}
+
+@keyframes clickItem {
+    0% {
+        transform: scale(0.97);
+    }
+    100% {
+
+    }
+}
+
+input[type=text] {
+    box-shadow: 0 0 0 3px #cccccc55 inset;
+    outline: none;
+    background: #00000077;
+    color: white;
+}
+
+input[type=text]:hover {
+    box-shadow: 0 0 0 3px #ccccccaa inset;
+    background: #000000bb;
+}
+
+input[type=text]:focus {
+    box-shadow: 0 0 0 3px #888 inset;
+    background: #fff;
+    color: black;
 }
