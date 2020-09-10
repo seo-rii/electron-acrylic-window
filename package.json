@@ -17,7 +17,8 @@
     "electron"
   ],
   "scripts": {
-    "build": "node-gyp rebuild",
+    "build": "npm run build-ts && node-gyp rebuild",
+    "build-ts": "tsc",
     "install": "node-gyp rebuild",
     "test": "electron test/test.js"
   },
@@ -40,6 +41,7 @@
     "win32-displayconfig": "^0.1.0"
   },
   "devDependencies": {
-    "electron": "^10.1.1"
+    "electron": "^10.1.1",
+    "typescript": "^4.0.2"
   }
 }
