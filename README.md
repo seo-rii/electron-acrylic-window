@@ -20,8 +20,14 @@ You should install Visual studio or Visual C++ build tools before install this.
 npm i electron-acrylic-window --save
 ```
 
+## Contributors
+Huge thanks to all contributors!
+<a href="https://github.com/Seo-Rii/electron-acrylic-window/graphs/contributors">
+  <img src="https://contributors-img.web.app/image?repo=Seo-Rii/electron-acrylic-window" />
+</a>
+
 ## Screenshots
-![Screenshot2](./screenshots/2.png)
+![Screenshot](./screenshots/2.png)
 
 ## Usage
 

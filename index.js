@@ -1,8 +1,28 @@
-const { setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy } = require("bindings")("vibrancy-wrapper");
+function loadModuleSafe() {
+    try {
+        const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require("bindings")("vibrancy-wrapper");
+        const {VerticalRefreshRateContext} = require("win32-displayconfig");
+        return {
+            wSetVibrancy: wSetVibrancy,
+            wDisableVibrancy: wDisableVibrancy,
+            VerticalRefreshRateContext: VerticalRefreshRateContext,
+            moduleLoadSuccess: true
+        }
+    } catch (e) {
+        return {
+            wSetVibrancy: null,
+            wDisableVibrancy: null,
+            VerticalRefreshRateContext: null,
+            moduleLoadSuccess: false
+        }
+    }
+}
+
+const {wSetVibrancy, wDisableVibrancy, VerticalRefreshRateContext, moduleLoadSuccess} = loadModuleSafe();
+
 const os = require("os");
 const eBrowserWindow = require("electron").BrowserWindow;
-const { nativeTheme, screen } = require("electron");
-const { VerticalRefreshRateContext } = require("win32-displayconfig");
+const {nativeTheme, screen} = require("electron");
 const supportedType = ['light', 'dark', 'appearance-based'];
 
 const _lightThemeColor = '#DDDDDD80', _darkThemeColor = '#22222280';
@@ -34,8 +54,9 @@ function getHwnd(win) {
 }
 
 function _setVibrancy(win, vibrancyOp = null) {
+    if (!moduleLoadSuccess) return;
     if (vibrancyOp && vibrancyOp.colors) {
-        if(_vibrancyDebug) console.log("Vibrancy On", vibrancyOp)
+        if (_vibrancyDebug) console.log("Vibrancy On", vibrancyOp)
         wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, vibrancyOp.colors.a);
         win._vibrancyActivated = true;
         setTimeout(() => {
@@ -49,7 +70,7 @@ function _setVibrancy(win, vibrancyOp = null) {
         if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp, win._vibrancyOp)
         win._vibrancyActivated = false;
         if (win._vibrancyOp) {
-            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors && win._vibrancyOp.colors.blur ? "#FE" + win._vibrancyOp.colors.blur.substring(1,7) : "#000000"));
+            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors && win._vibrancyOp.colors.blur ? "#FE" + win._vibrancyOp.colors.blur.substring(1, 7) : "#000000"));
         }
         setTimeout(() => {
             if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
@@ -100,7 +121,7 @@ function opFormatter(vibrancyProps) {
     }
 
     // Merge provided settings into defaults
-    let vibrancyOp = Object.assign(defaultSettings, (typeof vibrancyProps === "object" ? vibrancyProps : { theme: vibrancyProps }))
+    let vibrancyOp = Object.assign(defaultSettings, (typeof vibrancyProps === "object" ? vibrancyProps : {theme: vibrancyProps}))
 
     // Detect appropriate theme if 'appearance-based'
     if (vibrancyOp.theme && supportedType.indexOf(vibrancyOp.theme) === -1 && vibrancyOp.theme[0] !== '#') vibrancyOp.theme = 'appearance-based';
@@ -130,8 +151,9 @@ function opFormatter(vibrancyProps) {
             blur: "#" + vibrancyOp.theme.substring(1, 7) + "FF",
             focus: vibrancyOp.theme
         })
-    } catch(e) { }
-    
+    } catch (e) {
+    }
+
     // Debug output
     if (_vibrancyDebug) console.log(vibrancyOp)
 
@@ -146,7 +168,7 @@ class vBrowserWindow extends eBrowserWindow {
         let vibrancyOp = opFormatter(props.vibrancy);
         if (isWindows10() && vibrancyOp) {
             props.vibrancy = null;
-            if(vibrancyOp.theme)
+            if (vibrancyOp.theme)
                 props.backgroundColor = (vibrancyOp.colors ? vibrancyOp.colors.base.substring(0, 7) : false);
             props.show = false;
         }
@@ -213,7 +235,7 @@ class vBrowserWindow extends eBrowserWindow {
             async function doFollowUpQueryIfNecessary(cursor) {
                 if (doFollowUpQuery) {
                     const rate = await getRefreshRateAtCursor(cursor);
-                    if(_vibrancyDebug && rate != pollingRate) console.log(`New polling rate: ${rate}`)
+                    if (_vibrancyDebug && rate != pollingRate) console.log(`New polling rate: ${rate}`)
                     pollingRate = rate || 30;
                 }
             }
@@ -393,7 +415,7 @@ class vBrowserWindow extends eBrowserWindow {
     }
 
     static setVibrancy(op = null) {
-        if(!op) {
+        if (!op) {
             // If disabling vibrancy, turn off then save
             _setVibrancy(this, null)
             this._vibrancyOp = opFormatter(op);
@@ -405,7 +427,7 @@ class vBrowserWindow extends eBrowserWindow {
                 else _setVibrancy(this, this._vibrancyOp);
             }
         }
-        
+
     }
 
     static _bindAndReplace(object, method) {
@@ -418,7 +440,7 @@ class vBrowserWindow extends eBrowserWindow {
 
 function setVibrancy(win, op = 'appearance-based') {
     // If disabling vibrancy, turn off then save
-    if(!op) {
+    if (!op) {
         _setVibrancy(this, null);
         win._vibrancyOp = opFormatter(op);
     } else {

@@ -1,6 +1,6 @@
 declare module 'electron-acrylic-window' {
 
-    import { BrowserWindow as EBrowserWindow, BrowserWindowConstructorOptions } from 'electron';
+    import {BrowserWindow as EBrowserWindow, BrowserWindowConstructorOptions} from 'electron';
 
     class BrowserWindow extends EBrowserWindow {
 
