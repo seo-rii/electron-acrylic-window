@@ -177,7 +177,7 @@ class vBrowserWindow extends eBrowserWindow {
         win._vibrancyOp = vibrancyOp;
         win._vibrancyActivated = false;
 
-        if (vibrancyOp && vibrancyOp.useCustomWindowRefreshMethod) {
+        if (isWindows10() && vibrancyOp && vibrancyOp.useCustomWindowRefreshMethod) {
 
             // Unfortunately, we have to re-implement moving and resizing.
             // Enabling vibrancy slows down the window's event handling loop to the
@@ -397,10 +397,12 @@ class vBrowserWindow extends eBrowserWindow {
         if (vibrancyOp && vibrancyOp.disableOnBlur) {
             win.on('blur', () => {
                 if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
+                else win.setVibrancy(win._vibrancyOp.theme);
             })
 
             win.on('focus', () => {
                 if (isWindows10() && win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
+                else win.setVibrancy(win._vibrancyOp.theme);
             })
         }
 
@@ -421,7 +423,7 @@ class vBrowserWindow extends eBrowserWindow {
             this._vibrancyOp = opFormatter(op);
         } else {
             this._vibrancyOp = opFormatter(op);
-            if (!isWindows10()) super.setVibrancy(this._vibrancyOp);
+            if (!isWindows10()) super.setVibrancy(this._vibrancyOp.theme);
             else {
                 if (!op) _setVibrancy(this, null);
                 else _setVibrancy(this, this._vibrancyOp);

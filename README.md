@@ -27,7 +27,7 @@ Huge thanks to all contributors!
 </a>
 
 ## Screenshots
-![Screenshot](./screenshots/2.png)
+![Screenshot](./screenshots/3.png)
 
 ## Usage
 
