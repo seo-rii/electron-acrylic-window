@@ -173,7 +173,7 @@ class vBrowserWindow extends eBrowserWindow {
             props.show = false;
         }
         const win = new eBrowserWindow(props);
-        vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
+        if (isWindows10()) vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
         win._vibrancyOp = vibrancyOp;
         win._vibrancyActivated = false;
 
@@ -423,7 +423,7 @@ class vBrowserWindow extends eBrowserWindow {
             this._vibrancyOp = opFormatter(op);
         } else {
             this._vibrancyOp = opFormatter(op);
-            if (!isWindows10()) super.setVibrancy(this._vibrancyOp.theme);
+            if (!isWindows10()) this.setVibrancy(this._vibrancyOp.theme);
             else {
                 if (!op) _setVibrancy(this, null);
                 else _setVibrancy(this, this._vibrancyOp);
