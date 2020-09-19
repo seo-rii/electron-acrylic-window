@@ -57,7 +57,7 @@ function _setVibrancy(win, vibrancyOp = null) {
     if (!moduleLoadSuccess) return;
     if (vibrancyOp && vibrancyOp.colors) {
         if (_vibrancyDebug) console.log("Vibrancy On", vibrancyOp)
-        wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, vibrancyOp.colors.a);
+        wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, win._vibrancyOp.currentOpacity);
         win._vibrancyActivated = true;
         setTimeout(() => {
             try {
@@ -70,7 +70,7 @@ function _setVibrancy(win, vibrancyOp = null) {
         if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp, win._vibrancyOp)
         win._vibrancyActivated = false;
         if (win._vibrancyOp) {
-            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors && win._vibrancyOp.colors.blur ? "#FE" + win._vibrancyOp.colors.blur.substring(1, 7) : "#000000"));
+            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
         }
         setTimeout(() => {
             if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
@@ -148,9 +148,10 @@ function opFormatter(vibrancyProps) {
             g: parseInt(vibrancyOp.theme.substring(3, 5), 16),
             b: parseInt(vibrancyOp.theme.substring(5, 7), 16),
             a: parseInt(vibrancyOp.theme.substring(7, 9), 16),
-            blur: "#" + vibrancyOp.theme.substring(1, 7) + "FF",
             focus: vibrancyOp.theme
         })
+        if (!vibrancyOp.currentOpacity) vibrancyOp.currentOpacity = vibrancyOp.colors.a
+        if (!vibrancyOp.targetOpacity) vibrancyOp.targetOpacity = vibrancyOp.colors.a
     } catch (e) {
     }
 
@@ -395,15 +396,30 @@ class vBrowserWindow extends eBrowserWindow {
         }
 
         if (vibrancyOp && vibrancyOp.disableOnBlur) {
+            win._vibrancyOp.opacity = 0
+
             win.on('blur', () => {
-                if (isWindows10() && win._vibrancyOp) _setVibrancy(win, null);
+                if (isWindows10() && win._vibrancyOp) win._vibrancyOp.targetOpacity = 255
                 else win.setVibrancy(win._vibrancyOp.theme);
             })
 
             win.on('focus', () => {
-                if (isWindows10() && win._vibrancyOp) _setVibrancy(win, win._vibrancyOp);
+                if (isWindows10() && win._vibrancyOp) win._vibrancyOp.targetOpacity = win._vibrancyOp.colors.a
                 else win.setVibrancy(win._vibrancyOp.theme);
             })
+            let op = 0;
+            setInterval(() => {
+                try{
+                    let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
+                    if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
+                    else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
+                    else win._vibrancyOp.currentOpacity += colorDiff
+                    if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
+                    else _setVibrancy(win, null)
+                }catch (e) {
+
+                }
+            }, 1000 / 30)
         }
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
