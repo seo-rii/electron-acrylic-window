@@ -404,7 +404,7 @@ class vBrowserWindow extends eBrowserWindow {
                     if (!win._vibrancyOp.opacityInterval)
                         win._vibrancyOp.opacityInterval = setInterval(() => {
                             try {
-                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 4
                                 if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
                                     win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
                                     clearInterval(win._vibrancyOp.opacityInterval)
@@ -426,7 +426,7 @@ class vBrowserWindow extends eBrowserWindow {
                     if (!win._vibrancyOp.opacityInterval)
                         win._vibrancyOp.opacityInterval = setInterval(() => {
                             try {
-                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 4
                                 if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
                                     win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
                                     clearInterval(win._vibrancyOp.opacityInterval)
@@ -438,7 +438,7 @@ class vBrowserWindow extends eBrowserWindow {
                             } catch (e) {
 
                             }
-                        }, 1000 / 30)
+                        }, 1000 / 60)
                 } else win.setVibrancy(win._vibrancyOp.theme);
             })
         }
