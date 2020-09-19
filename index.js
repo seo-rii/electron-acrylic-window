@@ -399,27 +399,48 @@ class vBrowserWindow extends eBrowserWindow {
             win._vibrancyOp.opacity = 0
 
             win.on('blur', () => {
-                if (isWindows10() && win._vibrancyOp) win._vibrancyOp.targetOpacity = 255
-                else win.setVibrancy(win._vibrancyOp.theme);
+                if (isWindows10() && win._vibrancyOp) {
+                    win._vibrancyOp.targetOpacity = 255
+                    if (!win._vibrancyOp.opacityInterval)
+                        win._vibrancyOp.opacityInterval = setInterval(() => {
+                            try {
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
+                                if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
+                                    win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
+                                    clearInterval(win._vibrancyOp.opacityInterval)
+                                    win._vibrancyOp.opacityInterval = 0
+                                } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
+                                else win._vibrancyOp.currentOpacity += colorDiff
+                                if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
+                                else _setVibrancy(win, null)
+                            } catch (e) {
+
+                            }
+                        }, 1000 / 30)
+                } else win.setVibrancy(win._vibrancyOp.theme);
             })
 
             win.on('focus', () => {
-                if (isWindows10() && win._vibrancyOp) win._vibrancyOp.targetOpacity = win._vibrancyOp.colors.a
-                else win.setVibrancy(win._vibrancyOp.theme);
-            })
-            let op = 0;
-            setInterval(() => {
-                try{
-                    let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
-                    if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
-                    else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
-                    else win._vibrancyOp.currentOpacity += colorDiff
-                    if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
-                    else _setVibrancy(win, null)
-                }catch (e) {
+                if (isWindows10() && win._vibrancyOp) {
+                    win._vibrancyOp.targetOpacity = win._vibrancyOp.colors.a
+                    if (!win._vibrancyOp.opacityInterval)
+                        win._vibrancyOp.opacityInterval = setInterval(() => {
+                            try {
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 5
+                                if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
+                                    win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
+                                    clearInterval(win._vibrancyOp.opacityInterval)
+                                    win._vibrancyOp.opacityInterval = 0
+                                } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
+                                else win._vibrancyOp.currentOpacity += colorDiff
+                                if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
+                                else _setVibrancy(win, null)
+                            } catch (e) {
 
-                }
-            }, 1000 / 30)
+                            }
+                        }, 1000 / 30)
+                } else win.setVibrancy(win._vibrancyOp.theme);
+            })
         }
 
         if (isWindows10() && props.hasOwnProperty('vibrancy')) win.once('ready-to-show', () => {
