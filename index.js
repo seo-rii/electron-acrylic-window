@@ -271,6 +271,10 @@ class vBrowserWindow extends eBrowserWindow {
                     e.preventDefault();
                     return;
                 }
+                if (lastWillMoveBounds) {
+                    newBounds.width = lastWillMoveBounds.width;
+                    newBounds.height = lastWillMoveBounds.height;
+                }
                 lastWillMoveBounds = newBounds;
                 // If we're asked to perform some move update and it's under
                 // the refresh speed limit, we can just do it immediately.
@@ -317,11 +321,17 @@ class vBrowserWindow extends eBrowserWindow {
                             const cursor = screen.getCursorScreenPoint();
                             const didIt = guardingAgainstMoveUpdate(() => {
                                 // Set new position
-                                setWindowBounds({
-                                    x: basisBounds.x + (cursor.x - basisCursor.x),
-                                    y: basisBounds.y + (cursor.y - basisCursor.y),
-                                    width: basisBounds.width,
-                                    height: basisBounds.height
+                                if (lastWillResizeBounds && lastWillResizeBounds.width) setWindowBounds({
+                                    x: Math.floor(basisBounds.x + (cursor.x - basisCursor.x)),
+                                    y: Math.floor(basisBounds.y + (cursor.y - basisCursor.y)),
+                                    width: Math.floor(lastWillResizeBounds.width / screen.getDisplayMatching(basisBounds).scaleFactor),
+                                    height: Math.floor(lastWillResizeBounds.height / screen.getDisplayMatching(basisBounds).scaleFactor)
+                                });
+                                else setWindowBounds({
+                                    x: Math.floor(basisBounds.x + (cursor.x - basisCursor.x)),
+                                    y: Math.floor(basisBounds.y + (cursor.y - basisCursor.y)),
+                                    width: Math.floor(lastWillMoveBounds.width / screen.getDisplayMatching(basisBounds).scaleFactor),
+                                    height: Math.floor(lastWillMoveBounds.height / screen.getDisplayMatching(basisBounds).scaleFactor)
                                 });
                             });
                             if (didIt) {
@@ -355,10 +365,10 @@ class vBrowserWindow extends eBrowserWindow {
                     const forceBounds = desiredMoveBounds;
                     desiredMoveBounds = undefined;
                     win.setBounds({
-                        x: forceBounds.x,
-                        y: forceBounds.y,
-                        width: forceBounds.width,
-                        height: forceBounds.height
+                        x: Math.floor(forceBounds.x),
+                        y: Math.floor(forceBounds.y),
+                        width: Math.floor(forceBounds.width),
+                        height: Math.floor(forceBounds.height)
                     });
                 }
             });
