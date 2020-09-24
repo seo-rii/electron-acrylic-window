@@ -73,7 +73,11 @@ function _setVibrancy(win, vibrancyOp = null) {
             win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
         }
         setTimeout(() => {
-            if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
+            try {
+                if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
+            } catch (e) {
+
+            }
         }, 10);
     }
 }
@@ -347,7 +351,7 @@ class vBrowserWindow extends eBrowserWindow {
 
             win.on('move', (e) => {
                 if (disableJitterFix) {
-                    return true;
+                    return false;
                 }
                 if (isMoving || win.isDestroyed()) {
                     e.preventDefault();
@@ -421,7 +425,7 @@ class vBrowserWindow extends eBrowserWindow {
                                     win._vibrancyOp.opacityInterval = 0
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
-                                if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
+                                if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
                                 else _setVibrancy(win, null)
                             } catch (e) {
 
@@ -443,7 +447,7 @@ class vBrowserWindow extends eBrowserWindow {
                                     win._vibrancyOp.opacityInterval = 0
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
-                                if (win._vibrancyOp.currentOpacity > 0) _setVibrancy(win, win._vibrancyOp)
+                                if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
                                 else _setVibrancy(win, null)
                             } catch (e) {
 
