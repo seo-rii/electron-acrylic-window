@@ -426,12 +426,14 @@ class vBrowserWindow extends eBrowserWindow {
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
                                 if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
-                                else _setVibrancy(win, null)
+                                else {
+                                    win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
+                                }
                             } catch (e) {
 
                             }
                         }, 1000 / 30)
-                } else win.setVibrancy(win._vibrancyOp.theme);
+                }
             })
 
             win.on('focus', () => {
@@ -448,12 +450,14 @@ class vBrowserWindow extends eBrowserWindow {
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
                                 if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
-                                else _setVibrancy(win, null)
+                                else {
+                                    win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
+                                }
                             } catch (e) {
 
                             }
-                        }, 1000 / 60)
-                } else win.setVibrancy(win._vibrancyOp.theme);
+                        }, 1000 / 30)
+                }
             })
         }
 
