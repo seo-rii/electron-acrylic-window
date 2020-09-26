@@ -269,6 +269,7 @@ class vBrowserWindow extends eBrowserWindow {
             }
 
             win.on('will-move', (e, newBounds) => {
+                if (win._vibrancyOp.opacityInterval) return;
                 // We get a _lot_ of duplicate bounds sent to us in this event.
                 // This messes up our timing quite a bit.
                 if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
@@ -389,7 +390,7 @@ class vBrowserWindow extends eBrowserWindow {
                 // Some systems have trouble going 120 Hz, so we'll just take the lower
                 // of the current pollingRate and 60 Hz.
                 if (pollingRate !== undefined &&
-                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, 60))) {
+                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, vibrancyOp.maximumRefreshRate))) {
                     e.preventDefault();
                     return false;
                 }
@@ -418,17 +419,14 @@ class vBrowserWindow extends eBrowserWindow {
                     if (!win._vibrancyOp.opacityInterval)
                         win._vibrancyOp.opacityInterval = setInterval(() => {
                             try {
-                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 4
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 3.5
                                 if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
                                     win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
                                     clearInterval(win._vibrancyOp.opacityInterval)
                                     win._vibrancyOp.opacityInterval = 0
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
-                                if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
-                                else {
-                                    win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
-                                }
+                                _setVibrancy(win, win._vibrancyOp)
                             } catch (e) {
 
                             }
@@ -442,17 +440,14 @@ class vBrowserWindow extends eBrowserWindow {
                     if (!win._vibrancyOp.opacityInterval)
                         win._vibrancyOp.opacityInterval = setInterval(() => {
                             try {
-                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 4
+                                let colorDiff = (255 - win._vibrancyOp.colors.a) / 3.5
                                 if (Math.abs(win._vibrancyOp.currentOpacity - win._vibrancyOp.targetOpacity) < colorDiff) {
                                     win._vibrancyOp.currentOpacity = win._vibrancyOp.targetOpacity
                                     clearInterval(win._vibrancyOp.opacityInterval)
                                     win._vibrancyOp.opacityInterval = 0
                                 } else if (win._vibrancyOp.currentOpacity > win._vibrancyOp.targetOpacity) win._vibrancyOp.currentOpacity -= colorDiff
                                 else win._vibrancyOp.currentOpacity += colorDiff
-                                if (win._vibrancyOp.currentOpacity < 255) _setVibrancy(win, win._vibrancyOp)
-                                else {
-                                    win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
-                                }
+                                _setVibrancy(win, win._vibrancyOp)
                             } catch (e) {
 
                             }

@@ -27,7 +27,7 @@ Huge thanks to all contributors!
 </a>
 
 ## Screenshots
-![Screenshot](./screenshots/3.png)
+![Screenshot](./screenshots/4.png)
 
 ## Usage
 
@@ -41,7 +41,7 @@ win = new BrowserWindow({
 });
 ```
 
-- If OS is not Windows 10, it works perfectly the same.  
+- If OS is not Windows 10, it works perfectly the same as original function.  
 
 - If OS is Windows 10, it overrides construtor option and ```setVibrancy``` method to work properly on Windows 10.
 
