@@ -12,7 +12,7 @@ Only affects Windows 10. If the OS is not Windows 10, it will fall back on the o
 
 Inspired by [electron-vibrancy](https://github.com/arkenthera/electron-vibrancy).
 
-![Screenshot](./screenshots/4.png)
+<img alt="screenshot" src="./screenshots/5.png" width="50%"><img alt="screenshot" src="./screenshots/6.png" width="50%">
 
 ## Contributors
 Huge thanks to all contributors!
@@ -21,7 +21,7 @@ Huge thanks to all contributors!
 </a>
 
 ## Installation
-You will need Visual Studio or Visual C++ build tools to install this. An easy way to install the build tools can be found [here](https://www.npmjs.com/package/windows-build-tools).
+You will need Visual Studio or Visual C++ build tools to install this. An easy way to install them can be found [here](https://www.npmjs.com/package/windows-build-tools).
 
 ```shell script
 npm i electron-acrylic-window --save
@@ -29,11 +29,11 @@ npm i electron-acrylic-window --save
 
 ## Usage
 
-### `BrowserWindow` - Wrapper class for `electron.BrowserWindow`. 
+### `BrowserWindow` - Wrapper class for `electron.BrowserWindow`
 Enables Vibrancy on the Electron window.
 
 ```js
-const BrowserWindow = require("electron-acrylic-window");
+const {BrowserWindow} = require("electron-acrylic-window");
 
 win = new BrowserWindow({
     ...,
@@ -48,7 +48,7 @@ If OS is Windows 10, it overrides the construtor option and `BrowserWindow.setVi
 Enables Vibrancy on the Electron window.
 
 ```js
-const setVibrancy = require("electron-acrylic-window");
+const {setVibrancy} = require("electron-acrylic-window");
 
 setVibrancy(win, [options]);
 
@@ -65,19 +65,19 @@ There is no return value. If it fails to set vibrancy, it throws an error.
 
 #### Errors
 - `WINDOW_NOT_GIVEN` - Error that occurs when `win` parameter is not passed.
-    kjsdlfkjlsdkfjlsdkjf
 - `NOT_VALID_WINDOW` - Error that occurs when `win` parameter is not valid Electron window.
 - `FAIL_LOAD_DLL` - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
 - `UNKNOWN` - Other error.
 
 ### Options
-If OS is not Windows 10, \[options\] will be passed on to the original vibrancy function/option, so keep that in mind.
-  
-On Windows 10, \[options\] should be a String or Object.
+If OS is not Windows 10, `[options]` will be passed on to the original vibrancy function/option, so keep that in mind.
+
+On Windows 10, `[options]` should be a String or an Object.
 
 - **String**
-    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'222222aa'`).  
-    Defaults to `'appearance-based'`.
+    
+    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'#222222aa'`).  
+    Default is `'appearance-based'`.
 
 - **Object**
 
@@ -111,16 +111,16 @@ On Windows 10, \[options\] should be a String or Object.
     
     - `maximumRefreshRate` - Number (optional)
 
-        Maximum value to refresh application screen in second. Default is `60`.
+        Maximum refresh rate of the aplication, in hertz. Default is `60`.
     
     - `disableOnBlur` - Boolean (optional)
         
         If true, acrylic effect will be disabled when the window loses focus, to mimic the behaviour of normal UWP apps. Default is `true`.
 
 ## Demo
-There is a demo Electron application.
 
-To run, just clone this repository, install the dependencies and run the test script:
+To run the demo Electron application, clone this repository, install the dependencies and run the test script:
+
 ```bash
 git clone https://github.com/Seo-Rii/electron-acrylic-window.git
 cd electron-acrylic-window
