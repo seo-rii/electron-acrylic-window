@@ -93,7 +93,7 @@ On Windows 10, `[options]` should be a String or an Object.
 
     - `theme` - String (optional)
         
-        Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'222222aa'`). Default is `'apearance-based'`
+        Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'#222222aa'`). Default is `'apearance-based'`
     
     - `effect` - String (optional)
 
