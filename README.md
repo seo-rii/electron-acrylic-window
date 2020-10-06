@@ -105,7 +105,7 @@ On Windows 10, `[options]` should be a String or an Object.
         
         Use custom window resize/move handler for performance. Default is `true`.
         
-        Special thanks to @djsweet and @xanderfrangos.  
+        Special thanks to [@djsweet](https://github.com/djsweet) and [@xanderfrangos](https://github.com/xanderfrangos).  
         
         > **This is an experimental feature. May cause errors.**
     
