@@ -1,24 +1,18 @@
-# electron-acrylic-window
+<p align="center"><img alt="logo" src="./logo.png" width="200"></p>
 
-<img alt="logo" src="./logo.png" width="250"> 
+<h1 align="center">electron-acrylic-window</h1>
   
 [![Build Status](https://travis-ci.com/seo-rii/electron-acrylic-window.svg?branch=master)](https://travis-ci.com/seo-rii/electron-acrylic-window)
 [![Dependencies](https://david-dm.org/seo-rii/electron-acrylic-window.svg)](https://david-dm.org/seo-rii/electron-acrylic-window) 
 [![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)  
 
-Simply add vibrancy effect to Electron application on Windows.
+Makes it simple to add the Windows 10 Acrylic effect to Electron applications, by acting as a wrapper for the standard Electron vibrancy feature.
 
-Works only on Windows 10. If os is not Windows 10, it will call original function.  
+Only affects Windows 10. If the OS is not Windows 10, it will fall back on the original vibrancy function.
 
-Inspired from ```electron-vibrancy```.
+Inspired by [electron-vibrancy](https://github.com/arkenthera/electron-vibrancy).
 
-## Download
-
-You should install Visual studio or Visual C++ build tools before install this.
-
-```shell script
-npm i electron-acrylic-window --save
-```
+<img alt="screenshot" src="./screenshots/5.png" width="50%"><img alt="screenshot" src="./screenshots/6.png" width="50%">
 
 ## Contributors
 Huge thanks to all contributors!
@@ -26,40 +20,67 @@ Huge thanks to all contributors!
   <img src="https://contributors-img.web.app/image?repo=Seo-Rii/electron-acrylic-window" />
 </a>
 
-## Screenshots
-![Screenshot](./screenshots/4.png)
+## Installation
+You will need Visual Studio or Visual C++ build tools to install this. An easy way to install them can be found [here](https://www.npmjs.com/package/windows-build-tools).
+
+```shell script
+npm i electron-acrylic-window --save
+```
 
 ## Usage
 
-### `BrowserWindow` - Wrapper class for ```BrowserWindow```.  
+### `BrowserWindow` - Wrapper class for `electron.BrowserWindow`
+Enables Vibrancy on the Electron window.
 
 ```js
+const {BrowserWindow} = require("electron-acrylic-window");
+
 win = new BrowserWindow({
     ...,
     frame: false,
-    vibrancy: 'dark' // 'dark', 'light', 'appearance-based', hex colour code with alpha '#ffff0066', or Object below
+    vibrancy: [options] // See below
 });
 ```
 
-- If OS is not Windows 10, it works perfectly the same as original function.  
+If OS is Windows 10, it overrides the construtor option and `BrowserWindow.setVibrancy` method to work properly on Windows 10. If OS is not Windows 10, it will work normally.
 
-- If OS is Windows 10, it overrides construtor option and ```setVibrancy``` method to work properly on Windows 10.
+### `setVibrancy` - Wrapper function for `electron.BrowserWindow.setVibrancy`
+Enables Vibrancy on the Electron window.
 
-### `setVibrancy`
+```js
+const {setVibrancy} = require("electron-acrylic-window");
 
-```javascript
-setVibrancy(win, op = null);
+setVibrancy(win, [options]);
+
+// OR
+
+win.setVibrancy([options]);
 ```
 
-- Enables Vibrancy to window.
-    - There is no return value. If it fails to set vibrancy, it throws error.  
-```win``` should be frameLess, and transparent.  
-    - This function will call ```win.setVibrancy(op)``` if os is not Windows 10.  
-On Windows 10, op should be String or Object.
- * String
-    op should be 'light', 'dark', 'appearance-based' or a hex colour code with alpha.  
-    If not, it'll be set up as 'appearance-based'.
- * Object
+`win` should be frameles.
+
+Will call original `win.setVibrancy(op)` Electron function if OS is not Windows 10.
+
+There is no return value. If it fails to set vibrancy, it throws an error.  
+
+#### Errors
+- `WINDOW_NOT_GIVEN` - Error that occurs when `win` parameter is not passed.
+- `NOT_VALID_WINDOW` - Error that occurs when `win` parameter is not valid Electron window.
+- `FAIL_LOAD_DLL` - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
+- `UNKNOWN` - Other error.
+
+### Options
+If OS is not Windows 10, `[options]` will be passed on to the original vibrancy function/option, so keep that in mind.
+
+On Windows 10, `[options]` should be a String or an Object.
+
+- **String**
+    
+    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'#222222aa'`).  
+    Default is `'appearance-based'`.
+
+- **Object**
+
     ```javascript
     op = {
        theme: String ( = 'appearance-based'),
@@ -67,50 +88,42 @@ On Windows 10, op should be String or Object.
        useCustomWindowRefreshMethod: Boolean ( = true),
        maximumRefreshRate: Number ( = 60),
        disableOnBlur: Boolean ( = true)
-    }   
-   ```
-   * theme  
-        theme sets color of acrylic effect
-        theme should be 'light', 'dark', 'appearance-based' or a hex colour code with alpha.
-        If not, it'll be set up as 'appearance-based'.
-   * effect  
-        effect sets method of Acrylic blur.
-        effect should be 'acrylic' or 'blur'.  
-        **Setting this option to acrylic may cause performance degradation.**  
-        **If the version of the window is RS3 or lower, the 'blur' is forced.**
-   * useCustomWindowRefreshMethod  
-        Use custom window resize/move handler for performance.
-        Special thanks to @djsweet and @xanderfrangos.  
-        **This is experimental option. It can cause unintentional error.**
-   * maximumRefreshRate  
-        Maximum value to refresh application screen in second.  
-   * disableOnBlur   
-        If true, acrylic effect will be disabled when window lost focus.
-    
+    }
+    ```
 
-- **Errors**
-    - WINDOW_NOT_GIVEN  
-        - Error that occurs when ```win``` parameter is not passed.
-    - NOT_VALID_WINDOW   
-        - Error that occurs when ```win``` parameter is not valid Electron window.
-    - FAIL_LOAD_DLL  
-        - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
-    - UNKNOWN  
-        - Unknown error.
+    - `theme` - String (optional)
+        
+        Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'222222aa'`). Default is `'apearance-based'`
+    
+    - `effect` - String (optional)
+
+        Sets the type of Windows transparency effect, either `'acrylic'` or `'blur'`. Default is `'acrylic'`.
+        
+        > **Setting this option to acrylic may cause performance degradation. Acrylic only works on Windows 10 RS3 or above, otherwise `'blur'` is forced.**
+    
+    - `useCustomWindowRefreshMethod` - Boolean (optional)
+        
+        Use custom window resize/move handler for performance. Default is `true`.
+        
+        Special thanks to @djsweet and @xanderfrangos.  
+        
+        > **This is an experimental feature. May cause errors.**
+    
+    - `maximumRefreshRate` - Number (optional)
+
+        Maximum refresh rate of the aplication, in hertz. Default is `60`.
+    
+    - `disableOnBlur` - Boolean (optional)
+        
+        If true, acrylic effect will be disabled when the window loses focus, to mimic the behaviour of normal UWP apps. Default is `true`.
 
 ## Demo
 
-Clone this repository;
+To run the demo Electron application, clone this repository, install the dependencies and run the test script:
+
 ```bash
 git clone https://github.com/Seo-Rii/electron-acrylic-window.git
-```
-
-Install dependencies;
-```bash
+cd electron-acrylic-window
 npm install
-```
-
-Run the test application;
-```bash
-npm run test
+npm test
 ```
