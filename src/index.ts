@@ -1,1 +1,2 @@
-export { BrowserWindow } from "electron";
+export { BrowserWindow } from 'electron';
+export { setVibrancy } from './vibrancy'
