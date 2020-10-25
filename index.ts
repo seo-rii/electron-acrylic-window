@@ -1,92 +1,77 @@
-function loadModuleSafe() {
-    try {
-        const {setVibrancy: wSetVibrancy, disableVibrancy: wDisableVibrancy} = require("bindings")("vibrancy-wrapper");
-        const {VerticalRefreshRateContext} = require("win32-displayconfig");
-        return {
-            wSetVibrancy: wSetVibrancy,
-            wDisableVibrancy: wDisableVibrancy,
-            VerticalRefreshRateContext: VerticalRefreshRateContext,
-            moduleLoadSuccess: true
-        }
-    } catch (e) {
-        return {
-            wSetVibrancy: null,
-            wDisableVibrancy: null,
-            VerticalRefreshRateContext: null,
-            moduleLoadSuccess: false
-        }
-    }
-}
+import * as bindings from './bindings'
+import { VerticalRefreshRateContext } from 'win32-displayconfig'
+import * as os from 'os'
+import * as electron from 'electron'
 
-const {wSetVibrancy, wDisableVibrancy, VerticalRefreshRateContext, moduleLoadSuccess} = loadModuleSafe();
+const supportedType = ['light', 'dark', 'appearance-based']
 
-const os = require("os");
-const eBrowserWindow = require("electron").BrowserWindow;
-const {nativeTheme, screen} = require("electron");
-const supportedType = ['light', 'dark', 'appearance-based'];
-
-const _lightThemeColor = '#DDDDDD80', _darkThemeColor = '#22222280';
+const _lightThemeColor: [221, 221, 221, 136] = [221, 221, 221, 136]
+const _darkThemeColor: [34, 34, 34, 136] = [34, 34, 34, 136]
 
 let _vibrancyDebug = false;
 
-function isWindows10() {
-    if (process.platform !== 'win32') return false;
-    return os.release().split('.')[0] === '10';
+function _getIsWindows10() {
+    if (process.platform !== 'win32') return false
+    return os.release().split('.')[0] === '10'
 }
+
+const _isWindows10 = _getIsWindows10()
+const isWindows10 = () => _isWindows10;
 
 function isRS4OrGreater() {
     if (!isWindows10()) return false;
     return !(os.release().split('.')[1] === '0' && parseInt(os.release().split('.')[2]) < 17134);
 }
 
-function getHwnd(win) {
-    if (!win) throw new TypeError('WINDOW_NOT_GIVEN');
+function getHwnd(win: BrowserWindow) {
+    if (!win) throw new TypeError('WINDOW_NOT_GIVEN')
     try {
-        const hbuf = win.getNativeWindowHandle();
+        const hbuf = win.getNativeWindowHandle()
         if (os.endianness() === "LE") {
-            return hbuf.readInt32LE();
+            return hbuf.readInt32LE(0)
         } else {
-            return hbuf.readInt32BE();
+            return hbuf.readInt32BE(0)
         }
     } catch (e) {
-        throw new TypeError('NOT_VALID_WINDOW');
+        throw new TypeError('NOT_VALID_WINDOW')
     }
 }
 
-function _setVibrancy(win, vibrancyOp = null) {
-    if (!moduleLoadSuccess) return;
-    if (vibrancyOp && vibrancyOp.colors) {
-        if (_vibrancyDebug) console.log("Vibrancy On", vibrancyOp)
-        wSetVibrancy(getHwnd(win), vibrancyOp.effect, vibrancyOp.colors.r, vibrancyOp.colors.g, vibrancyOp.colors.b, win._vibrancyOp.currentOpacity);
-        win._vibrancyActivated = true;
+function _setVibrancy(win: BrowserWindow, config: VibrancyConfig) {
+    const winConfig = windowConfigs[win.id]
+
+    if (config && config.colors) {
+        if (_vibrancyDebug) console.log("Vibrancy On", config)
+        bindings.setVibrancy(getHwnd(win), config.effect, config.colors.r, config.colors.g, config.colors.b, winConfig.vibrnacyConfig.currentOpacity);
+        winConfig.vibrancyActivated = true;
         setTimeout(() => {
             try {
-                if (win._vibrancyActivated) win.setBackgroundColor('#00000000');
+                if (winConfig.vibrancyActivated) win.setBackgroundColor('#00000000');
             } catch (e) {
 
             }
         }, 50);
     } else {
-        if (_vibrancyDebug) console.log("Vibrancy Off", vibrancyOp, win._vibrancyOp)
-        win._vibrancyActivated = false;
-        if (win._vibrancyOp) {
-            win.setBackgroundColor((win._vibrancyOp && win._vibrancyOp.colors ? "#FE" + win._vibrancyOp.colors.r + win._vibrancyOp.colors.g + win._vibrancyOp.colors.b : "#000000"));
+        if (_vibrancyDebug) console.log("Vibrancy Off", config, winConfig.vibrnacyConfig)
+        winConfig.vibrancyActivated = false;
+        if (winConfig.vibrnacyConfig) {
+            win.setBackgroundColor((winConfig.vibrnacyConfig && winConfig.vibrnacyConfig.colors ? "#FE" + winConfig.vibrnacyConfig.colors.r + winConfig.vibrnacyConfig.colors.g + winConfig.vibrnacyConfig.colors.b : "#000000"));
         }
         setTimeout(() => {
             try {
-                if (!win._vibrancyActivated) wDisableVibrancy(getHwnd(win));
+                if (!winConfig.vibrancyActivated) bindings.disableVibrancy(getHwnd(win));
             } catch (e) {
 
             }
-        }, 10);
+         }, 10);
     }
 }
 
-function sleep(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
+function sleep(duration: number) {
+    return new Promise(resolve => setTimeout(resolve, duration));
 }
 
-function areBoundsEqual(left, right) {
+function areBoundsEqual(left: any, right: any) {
     return left.height === right.height
         && left.width === right.width
         && left.x === right.x
@@ -95,7 +80,7 @@ function areBoundsEqual(left, right) {
 
 const billion = 1000 * 1000 * 1000;
 
-function hrtimeDeltaForFrequency(freq) {
+function hrtimeDeltaForFrequency(freq: number) {
     return BigInt(Math.ceil(billion / freq));
 }
 
@@ -103,8 +88,8 @@ let disableJitterFix = false
 
 // Detect if cursor is near the screen edge. Used to disable the jitter fix in 'move' event.
 function isInSnapZone() {
-    const point = screen.getCursorScreenPoint()
-    const display = screen.getDisplayNearestPoint(point)
+    const point = electron.screen.getCursorScreenPoint()
+    const display = electron.screen.getDisplayNearestPoint(point)
 
     // Check if cursor is near the left/right edge of the active display
     if ((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
@@ -113,10 +98,79 @@ function isInSnapZone() {
     return false
 }
 
-function opFormatter(vibrancyProps) {
+interface VibrancyConfig {
+    colors: { r: number, g: number, b: number, a: number }
+    effect: 0 | 1;
+    useCustomWindowRefreshMethod?: boolean;
+    maximumRefreshRate?: number;
+    disableOnBlur?: boolean;
+    debug: boolean
+    currentOpacity: number
+}
 
-    const defaultSettings = {
-        theme: false,
+function dbHexToRgb(hex: string) {
+    const result = /^#?([a-f\d]{2})$/i.exec(hex);
+    return result ? parseInt(result[1], 16) : undefined;
+}
+
+function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['colors'] {
+    const unkownTheme = typeof theme === 'string' && supportedType.indexOf(theme) === -1
+
+    const dark = {
+        r: _darkThemeColor[0],
+        g: _darkThemeColor[1],
+        b: _darkThemeColor[2],
+        a: _darkThemeColor[3]
+    };
+
+    const light = {
+        r: _lightThemeColor[0],
+        g: _lightThemeColor[1],
+        b: _lightThemeColor[2],
+        a: _lightThemeColor[3]
+    };
+
+    if (unkownTheme || theme === 'appearance-based') {
+        if (electron.nativeTheme.shouldUseDarkColors)
+            // dark
+            return dark
+        else
+            return light
+    }
+
+    if (theme === 'light')
+        return light
+
+    if (theme === 'dark')
+        return dark
+
+    if (typeof theme === 'object') {
+        if ('hex' in theme) {
+            const r = dbHexToRgb(theme.hex.slice(0, 2));
+            const g = dbHexToRgb(theme.hex.slice(2, 4));
+            const b = dbHexToRgb(theme.hex.slice(4, 6));
+            const a = dbHexToRgb(theme.hex.slice(6, 8));
+
+            if (!(r && g && b && a))
+                return light
+
+            return { r, g, b, a }
+        } else if ('rgba' in theme) {
+            return {
+                r: theme.rgba[0],
+                g: theme.rgba[1],
+                b: theme.rgba[2],
+                a: theme.rgba[3]
+            }
+        }
+    }
+
+    return light
+}
+
+function opFormatter(vibrancyOptions: Vibrancy | undefined): VibrancyConfig {
+    const defaultSettings: VibrancyOptions = {
+        theme: undefined,
         effect: 'acrylic',
         useCustomWindowRefreshMethod: true,
         maximumRefreshRate: 60,
@@ -124,65 +178,133 @@ function opFormatter(vibrancyProps) {
         debug: false
     }
 
+    const options = Object.assign(defaultSettings, typeof vibrancyOptions === "object" ? vibrancyOptions : { theme: vibrancyOptions })
+
     // Merge provided settings into defaults
-    let vibrancyOp = Object.assign(defaultSettings, (typeof vibrancyProps === "object" ? vibrancyProps : {theme: vibrancyProps}))
-
-    // Detect appropriate theme if 'appearance-based'
-    if (vibrancyOp.theme && supportedType.indexOf(vibrancyOp.theme) === -1 && vibrancyOp.theme[0] !== '#') vibrancyOp.theme = 'appearance-based';
-    if (vibrancyOp.theme === 'appearance-based') {
-        if (nativeTheme.shouldUseDarkColors) vibrancyOp.theme = 'dark';
-        else vibrancyOp.theme = 'light';
+    let config: VibrancyConfig = {
+        debug: options.debug ?? false,
+        disableOnBlur: options.disableOnBlur,
+        effect: 0,
+        maximumRefreshRate: options.maximumRefreshRate,
+        useCustomWindowRefreshMethod: options.useCustomWindowRefreshMethod,
+        colors: getColorsFromTheme(options.theme),
+        currentOpacity: 0
     }
-
-    // Use default 'light' or 'dark' themes, if requested
-    if (vibrancyOp.theme === 'light') vibrancyOp.theme = _lightThemeColor;
-    else if (vibrancyOp.theme === 'dark') vibrancyOp.theme = _darkThemeColor;
 
     // Set blur type
-    if (vibrancyOp.effect === 'acrylic' || vibrancyOp.effect === 1) {
-        if (isRS4OrGreater()) vibrancyOp.effect = 1;
-        else vibrancyOp.effect = 0;
-    } else vibrancyOp.effect = 0;
-
-    // Pre-calculate color values, if possible
-    try {
-        vibrancyOp.colors = (!vibrancyOp.theme ? false : {
-            base: vibrancyOp.theme,
-            r: parseInt(vibrancyOp.theme.substring(1, 3), 16),
-            g: parseInt(vibrancyOp.theme.substring(3, 5), 16),
-            b: parseInt(vibrancyOp.theme.substring(5, 7), 16),
-            a: parseInt(vibrancyOp.theme.substring(7, 9), 16),
-            focus: vibrancyOp.theme
-        })
-        if (!vibrancyOp.currentOpacity) vibrancyOp.currentOpacity = vibrancyOp.colors.a
-        if (!vibrancyOp.targetOpacity) vibrancyOp.targetOpacity = vibrancyOp.colors.a
-    } catch (e) {
-    }
+    if (options.effect === 'acrylic' && isRS4OrGreater())
+        config.effect = 1;
 
     // Debug output
-    if (_vibrancyDebug) console.log(vibrancyOp)
+    if (_vibrancyDebug)
+        console.log(config)
 
-    return vibrancyOp;
+    return config;
 }
 
-class vBrowserWindow extends eBrowserWindow {
-    constructor(props) {
-        let oShow = props.show;
-        if (!('show' in props)) oShow = true;
-        if (props.vibrancy && props.vibrancy.debug) _vibrancyDebug = true;
-        let vibrancyOp = opFormatter(props.vibrancy);
-        if (isWindows10() && vibrancyOp) {
+/**
+ * The theme to apply to the vibrancy. Can be 'light',
+ * 'dark', 'appearance-based' or a custom HEX color
+ * with alpha.
+ */
+type VibrancyTheme = 'light' | 'dark' | 'appearance-based' | { hex: string } | { rgba: [number, number, number, number] };
+
+/**
+ * The effect to apply. Can be 'acrylic' or 'blur'.
+ */
+type VibrancyEffect = 'acrylic' | 'blur';
+
+/**
+ * The vibrancy object
+ */
+interface VibrancyOptions {
+    /**
+     * The theme to use.
+     */
+    theme?: VibrancyTheme;
+
+    /**
+     * The effect to use.
+     */
+    effect?: VibrancyEffect;
+
+    /**
+     * If enabled, we use a custom window resize/move
+     * handler for performance.
+     */
+    useCustomWindowRefreshMethod?: boolean;
+
+    /**
+     * Maximum value to refresh application screen
+     * in seconds.
+     */
+    maximumRefreshRate?: number;
+
+    /**
+     * If true, acrylic effect will be disabled whe
+     * window lost focus.
+     */
+    disableOnBlur?: boolean;
+
+    debug?: boolean
+}
+
+type Vibrancy = VibrancyTheme | VibrancyOptions
+
+/**
+ * Allow modifying default BrowserWindowConstructorOptions
+ * to change vibrancy to VibrancyOptions.
+ */
+type Modify<T, R> = Omit<T, keyof R> & R;
+
+/**
+ * The new options of the BrowserWindow with the VibrancyOptions.
+ */
+type AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowConstructorOptions, {
+
+    /**
+     * The vibrancy settings for the window. Can be
+     * a VibrancyTheme or the VibrancyOptions object.
+     */
+    vibrancy?: Vibrancy
+}>;
+
+interface WindowConfig {
+    vibrancyActivated: boolean
+    vibrnacyConfig: VibrancyConfig
+}
+
+const windowConfigs: Record<number, WindowConfig> = {}
+
+class BrowserWindow extends electron.BrowserWindow {    
+    constructor(options?: AcrylicBrowserWindowConstructorOptions) {
+        super(Object.assign(options, { vibrancy: undefined }))
+
+        let oShow = options?.show ?? true;
+
+        if (typeof options?.vibrancy === 'object' && 'debug' in options.vibrancy && options.vibrancy.debug)
+            _vibrancyDebug = true;
+
+
+        let config = opFormatter(options?.vibrancy);
+
+        if (isWindows10() && config) {
             props.vibrancy = null;
-            if (vibrancyOp.theme)
-                props.backgroundColor = (vibrancyOp.colors ? vibrancyOp.colors.base.substring(0, 7) : false);
+            if (config.theme)
+                props.backgroundColor = (config.colors ? config.colors.base.substring(0, 7) : false);
             props.show = false;
         }
-        const win = new eBrowserWindow(props);
-        if (isWindows10()) vBrowserWindow._bindAndReplace(win, vBrowserWindow.setVibrancy);
-        win._vibrancyOp = vibrancyOp;
-        win._vibrancyActivated = false;
 
-        if (isWindows10() && vibrancyOp && vibrancyOp.useCustomWindowRefreshMethod) {
+
+        if (isWindows10())
+            BrowserWindow._bindAndReplace(win, BrowserWindow.setVibrancy);
+
+        const winConf = windowConfigs[this.id] = {
+            vibrnacyConfig: config,
+            vibrancyActivated: false
+        }
+
+        if (isWindows10() && config && config.useCustomWindowRefreshMethod) {
 
             // Unfortunately, we have to re-implement moving and resizing.
             // Enabling vibrancy slows down the window's event handling loop to the
@@ -298,7 +420,7 @@ class vBrowserWindow extends eBrowserWindow {
                 if (win._moveTimeout) clearTimeout(win._moveTimeout);
                 win._moveTimeout = setTimeout(() => {
                     shouldMove = false;
-                }, 1000 / Math.min(pollingRate, vibrancyOp.maximumRefreshRate));
+                }, 1000 / Math.min(pollingRate, config.maximumRefreshRate));
 
                 // Disable next event ('move') if cursor is near the screen edge
                 disableJitterFix = isInSnapZone()
@@ -390,7 +512,7 @@ class vBrowserWindow extends eBrowserWindow {
                 // Some systems have trouble going 120 Hz, so we'll just take the lower
                 // of the current pollingRate and 60 Hz.
                 if (pollingRate !== undefined &&
-                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, vibrancyOp.maximumRefreshRate))) {
+                    currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, config.maximumRefreshRate))) {
                     e.preventDefault();
                     return false;
                 }
@@ -410,7 +532,7 @@ class vBrowserWindow extends eBrowserWindow {
             win.on('closed', refreshCtx.close);
         }
 
-        if (vibrancyOp && vibrancyOp.disableOnBlur) {
+        if (config && config.disableOnBlur) {
             win._vibrancyOp.opacity = 0
 
             win.on('blur', () => {
@@ -490,7 +612,7 @@ class vBrowserWindow extends eBrowserWindow {
     }
 }
 
-function setVibrancy(win, op = 'appearance-based') {
+function SetVibrancy(win, op = 'appearance-based') {
     // If disabling vibrancy, turn off then save
     if (!op) {
         _setVibrancy(this, null);
@@ -505,5 +627,5 @@ function setVibrancy(win, op = 'appearance-based') {
     }
 }
 
-exports.setVibrancy = setVibrancy;
-exports.BrowserWindow = vBrowserWindow;
+exports.setVibrancy = SetVibrancy;
+exports.BrowserWindow = BrowserWindow;
