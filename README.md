@@ -42,7 +42,7 @@ win = new BrowserWindow({
 });
 ```
 
-If OS is Windows 10, it overrides the construtor option and `BrowserWindow.setVibrancy` method to work properly on Windows 10. If OS is not Windows 10, it will work normally.
+If OS is Windows 10, it overrides the constructor option and `BrowserWindow.setVibrancy` method to work properly on Windows 10. If OS is not Windows 10, it will work normally.
 
 ### `setVibrancy` - Wrapper function for `electron.BrowserWindow.setVibrancy`
 Enables Vibrancy on the Electron window.
@@ -76,7 +76,7 @@ On Windows 10, `[options]` should be a String or an Object.
 
 - **String**
     
-    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'#222222aa'`).  
+    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`).  
     Default is `'appearance-based'`.
 
 - **Object**
@@ -93,7 +93,7 @@ On Windows 10, `[options]` should be a String or an Object.
 
     - `theme` - String (optional)
         
-        Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex colour code with alpha (`'#222222aa'`). Default is `'apearance-based'`
+        Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`). Default is `'appearance-based'`
     
     - `effect` - String (optional)
 
@@ -111,7 +111,7 @@ On Windows 10, `[options]` should be a String or an Object.
     
     - `maximumRefreshRate` - Number (optional)
 
-        Maximum refresh rate of the aplication, in hertz. Default is `60`.
+        Maximum refresh rate of the application, in hertz. Default is `60`.
     
     - `disableOnBlur` - Boolean (optional)
         
