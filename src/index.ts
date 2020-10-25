@@ -1,0 +1,1 @@
+export { BrowserWindow } from "electron";
