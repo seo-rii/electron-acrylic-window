@@ -58,6 +58,9 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 		let config = getConfigFromOptions(options?.vibrancy);
 
+		if (isWindows10 && options && options.vibrancy !== undefined)
+			options.vibrancy = undefined
+
 		if (isWindows10 && config) {
 			if (config.colors.base)
 				this.setBackgroundColor(rgbToHex(config.colors.base))
