@@ -1,5 +1,5 @@
-import * as bindings from './bindings'
-import { BrowserWindow } from './browserWindow'
+import bindings from './bindings'
+import { BrowserWindow, getWindowConfig, setWindowConfig } from './browserWindow'
 import debug from './debug'
 import { isRS4OrGreater, isWindows10 } from './os'
 import * as electron from 'electron'
@@ -194,7 +194,7 @@ export function getConfigFromOptions(vibrancyOptions: Vibrancy | undefined): Vib
 }
 
 export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
-	const winConfig = windowConfigs[win.id]
+	const winConfig = getWindowConfig(win)
 
 	if (config && config.colors) {
 		if (debug) console.log("Vibrancy On", config)
@@ -229,28 +229,38 @@ export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
  * @param options
  */
 export function setVibrancy(win: BrowserWindow, vibrancy: Vibrancy = 'appearance-based') {
+	const winConfig = getWindowConfig(win)
+
 	if (vibrancy) {
-		if (windowConfigs[win.id]) {
-			windowConfigs[win.id].vibrnacyConfig = getConfigFromOptions(vibrancy);
+		if (winConfig) {
+			winConfig.vibrnacyConfig = getConfigFromOptions(vibrancy);
 		} else {
-			windowConfigs[win.id] = {
+			setWindowConfig(win, {
 				vibrancyActivated: false,
-				vibrnacyConfig: getConfigFromOptions(vibrancy)
-			}
+				vibrnacyConfig: getConfigFromOptions(vibrancy),
+				currentOpacity: 0,
+				opacity: 0,
+				opacityInterval: undefined,
+				targetOpacity: 0
+			})
 		}
 
-		_setVibrancy(win, windowConfigs[win.id].vibrnacyConfig);
+		_setVibrancy(win, winConfig.vibrnacyConfig);
 	} else {
 		// If disabling vibrancy, turn off then save
 		_setVibrancy(win)
 
-		if (windowConfigs[win.id]) {
-			windowConfigs[win.id].vibrnacyConfig = getConfigFromOptions(undefined);
+		if (winConfig) {
+			winConfig.vibrnacyConfig = getConfigFromOptions(undefined);
 		} else {
-			windowConfigs[win.id] = {
+			setWindowConfig(win, {
 				vibrancyActivated: false,
-				vibrnacyConfig: getConfigFromOptions(undefined)
-			}
+				vibrnacyConfig: getConfigFromOptions(undefined),
+				currentOpacity: 0,
+				opacity: 0,
+				opacityInterval: undefined,
+				targetOpacity: 0
+			})
 		}
 	}
 }

@@ -4,6 +4,14 @@ import debug from './debug';
 import { isRS4OrGreater, isWindows10 } from './os';
 import { getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig, WindowConfig, _setVibrancy } from './vibrancy';
 
+export function getWindowConfig(win: BrowserWindow) {
+	return (win as any).__electron_acrylic_window__ as WindowConfig
+}
+
+export function setWindowConfig(win: BrowserWindow, config: WindowConfig) {
+	(win as any).__electron_acrylic_window__ = config
+}
+
 /**
  * Allow modifying default BrowserWindowConstructorOptions
  * to change vibrancy to VibrancyOptions.
@@ -51,8 +59,18 @@ export class BrowserWindow extends electron.BrowserWindow {
 		opacityInterval: undefined
 	}
 
+	private get __electron_acrylic_window__() : WindowConfig {
+		return this.#winconfig;
+	}
+
+	private set __electron_acrylic_window__(v: WindowConfig) {
+		this.#winconfig = v;
+	}
+
 	constructor(private options?: AcrylicBrowserWindowConstructorOptions) {
 		super(Object.assign(options, { vibrancy: undefined }))
+
+		void this.__electron_acrylic_window__
 
 		let oShow = options?.show ?? true;
 
