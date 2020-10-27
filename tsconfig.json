@@ -6,10 +6,13 @@
 		"sourceMap": true,
 		"declaration": true,
 		"strict": true,
-		"rootDir": "src"
+		"rootDir": "src",
+		"skipLibCheck": true,
+		"outDir": "build"
 	},
 	"exclude": [
 		"node_modules",
-		"test"
+		"test",
+		"build"
 	]
 }

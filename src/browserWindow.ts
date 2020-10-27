@@ -1,5 +1,5 @@
 import * as electron from 'electron'
-import { VibrancyOptions } from 'electron-acrylic-window';
+import { VibrancyOptions } from './vibrancy';
 import debug from './debug';
 import { isRS4OrGreater, isWindows10 } from './os';
 import { getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig, _setVibrancy } from './vibrancy';
@@ -10,16 +10,18 @@ import { getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig, _setVibrancy 
  */
 type Modify<T, R> = Omit<T, keyof R> & R;
 
-/**
- * The new options of the BrowserWindow with the VibrancyOptions.
- */
-export type AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowConstructorOptions, {
+type _AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowConstructorOptions, {
 	/**
 	 * The vibrancy settings for the window. Can be
 	 * a VibrancyTheme or the VibrancyOptions object.
 	 */
 	vibrancy?: Vibrancy
 }>;
+
+/**
+ * The new options of the BrowserWindow with the VibrancyOptions.
+ */
+export interface AcrylicBrowserWindowConstructorOptions extends _AcrylicBrowserWindowConstructorOptions { }
 
 export interface WindowConfig {
 	vibrancyActivated: boolean
@@ -75,8 +77,6 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 		void this.__electron_acrylic_window__
 
-		let oShow = options?.show ?? true;
-
 		let config = getConfigFromOptions(options?.vibrancy);
 
 		if (isWindows10 && options && options.vibrancy !== undefined)
@@ -85,7 +85,6 @@ export class BrowserWindow extends electron.BrowserWindow {
 		if (isWindows10 && config) {
 			if (config.colors.base)
 				this.setBackgroundColor(rgbToHex(config.colors.base))
-			this.hide()
 		}
 
 		if (isWindows10 && config && config.useCustomWindowRefreshMethod) { }
@@ -135,13 +134,5 @@ export class BrowserWindow extends electron.BrowserWindow {
 				}
 			})
 		}
-
-		if (isWindows10 && options && Object.prototype.hasOwnProperty.call(options, 'vibrancy'))
-			this.once('ready-to-show', () => {
-				setTimeout(() => {
-					if (oShow) this.show();
-					this.setVibrancy(options?.vibrancy);
-				}, 100);
-			});
 	}
 }
