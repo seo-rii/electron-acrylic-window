@@ -17,10 +17,16 @@ const supportedType = ['light', 'dark', 'appearance-based']
 const _lightThemeColor: [221, 221, 221, 136] = [221, 221, 221, 136]
 const _darkThemeColor: [34, 34, 34, 136] = [34, 34, 34, 136]
 
+/**
+ * Red, green, blue and alpha
+ */
 export interface RGBA extends RGB {
 	a: number
 }
 
+/**
+ * Red, green and blue
+ */
 export interface RGB {
 	r: number
 	g: number
@@ -118,7 +124,7 @@ export type VibrancyTheme = 'light' | 'dark' | 'appearance-based' | { hex?: stri
 export type VibrancyEffect = 'acrylic' | 'blur';
 
 /**
- * The vibrancy object
+ * Options to apply to the vibrancy
  */
 export interface VibrancyOptions {
 	/**

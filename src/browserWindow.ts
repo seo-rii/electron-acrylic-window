@@ -19,7 +19,7 @@ type _AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowCons
 }>;
 
 /**
- * The new options of the BrowserWindow with the VibrancyOptions.
+ * The options of the BrowserWindow constructor including the vibrancy options.
  */
 // The intelisense of type _AcrylicBrowserWindowConstructorOptions is shown as the raw type, instead of the actual type name.
 // tslint:disable-next-line
@@ -35,6 +35,10 @@ export interface WindowConfig {
 	moveTimeout: any
 }
 
+/**
+ * Class wrapper for `electron.BrowserWindow`.
+ * The class handles the vibrancy effects.
+ */
 export class BrowserWindow extends electron.BrowserWindow {
 	/**
 	 * Set the vibrancy for the specified window.
