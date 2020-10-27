@@ -1,5 +1,5 @@
 import bindings from './bindings'
-import { BrowserWindow, getWindowConfig, setWindowConfig } from './browserWindow'
+import { BrowserWindow } from './browserWindow'
 import debug from './debug'
 import { isRS4OrGreater, isWindows10 } from './os'
 import * as electron from 'electron'
@@ -16,15 +16,6 @@ const supportedType = ['light', 'dark', 'appearance-based']
 
 const _lightThemeColor: [221, 221, 221, 136] = [221, 221, 221, 136]
 const _darkThemeColor: [34, 34, 34, 136] = [34, 34, 34, 136]
-
-export interface WindowConfig {
-	vibrancyActivated: boolean
-	vibrnacyConfig: VibrancyConfig
-	targetOpacity: number
-	opacity: number
-	opacityInterval: any
-	currentOpacity: number
-}
 
 export interface RGBA extends RGB {
 	a: number
@@ -194,28 +185,26 @@ export function getConfigFromOptions(vibrancyOptions: Vibrancy | undefined): Vib
 }
 
 export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
-	const winConfig = getWindowConfig(win)
-
 	if (config && config.colors) {
 		if (debug) console.log("Vibrancy On", config)
-		bindings.setVibrancy(getHwnd(win), config.effect, config.colors.r, config.colors.g, config.colors.b, winConfig.vibrnacyConfig.currentOpacity);
-		winConfig.vibrancyActivated = true;
+		bindings.setVibrancy(getHwnd(win), config.effect, config.colors.r, config.colors.g, config.colors.b, win.__electron_acrylic_window__.vibrnacyConfig.currentOpacity);
+		win.__electron_acrylic_window__.vibrancyActivated = true;
 		setTimeout(() => {
 			try {
-				if (winConfig.vibrancyActivated) win.setBackgroundColor('#00000000');
+				if (win.__electron_acrylic_window__.vibrancyActivated) win.setBackgroundColor('#00000000');
 			} catch (e) {
 
 			}
 		}, 50);
 	} else {
-		if (debug) console.log("Vibrancy Off", config, winConfig.vibrnacyConfig)
-		winConfig.vibrancyActivated = false;
-		if (winConfig.vibrnacyConfig) {
-			win.setBackgroundColor((winConfig.vibrnacyConfig && winConfig.vibrnacyConfig.colors ? "#FE" + winConfig.vibrnacyConfig.colors.r + winConfig.vibrnacyConfig.colors.g + winConfig.vibrnacyConfig.colors.b : "#000000"));
+		if (debug) console.log("Vibrancy Off", config, win.__electron_acrylic_window__.vibrnacyConfig)
+		win.__electron_acrylic_window__.vibrancyActivated = false;
+		if (win.__electron_acrylic_window__.vibrnacyConfig) {
+			win.setBackgroundColor((win.__electron_acrylic_window__.vibrnacyConfig && win.__electron_acrylic_window__.vibrnacyConfig.colors ? "#FE" + win.__electron_acrylic_window__.vibrnacyConfig.colors.r + win.__electron_acrylic_window__.vibrnacyConfig.colors.g + win.__electron_acrylic_window__.vibrnacyConfig.colors.b : "#000000"));
 		}
 		setTimeout(() => {
 			try {
-				if (!winConfig.vibrancyActivated) bindings.disableVibrancy(getHwnd(win));
+				if (!win.__electron_acrylic_window__.vibrancyActivated) bindings.disableVibrancy(getHwnd(win));
 			} catch (e) {
 
 			}
@@ -229,38 +218,14 @@ export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
  * @param options
  */
 export function setVibrancy(win: BrowserWindow, vibrancy: Vibrancy = 'appearance-based') {
-	const winConfig = getWindowConfig(win)
-
 	if (vibrancy) {
-		if (winConfig) {
-			winConfig.vibrnacyConfig = getConfigFromOptions(vibrancy);
-		} else {
-			setWindowConfig(win, {
-				vibrancyActivated: false,
-				vibrnacyConfig: getConfigFromOptions(vibrancy),
-				currentOpacity: 0,
-				opacity: 0,
-				opacityInterval: undefined,
-				targetOpacity: 0
-			})
-		}
+		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(vibrancy);
 
-		_setVibrancy(win, winConfig.vibrnacyConfig);
+		_setVibrancy(win, win.__electron_acrylic_window__.vibrnacyConfig)
 	} else {
 		// If disabling vibrancy, turn off then save
 		_setVibrancy(win)
 
-		if (winConfig) {
-			winConfig.vibrnacyConfig = getConfigFromOptions(undefined);
-		} else {
-			setWindowConfig(win, {
-				vibrancyActivated: false,
-				vibrnacyConfig: getConfigFromOptions(undefined),
-				currentOpacity: 0,
-				opacity: 0,
-				opacityInterval: undefined,
-				targetOpacity: 0
-			})
-		}
+		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(undefined);
 	}
 }
