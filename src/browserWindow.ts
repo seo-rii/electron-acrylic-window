@@ -21,6 +21,8 @@ type _AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowCons
 /**
  * The new options of the BrowserWindow with the VibrancyOptions.
  */
+// The intelisense of type _AcrylicBrowserWindowConstructorOptions is shown as the raw type, instead of the actual type name.
+// tslint:disable-next-line
 export interface AcrylicBrowserWindowConstructorOptions extends _AcrylicBrowserWindowConstructorOptions { }
 
 export interface WindowConfig {
