@@ -106,4 +106,8 @@ dist
 # Build files
 build/
 
+# TypeScript sourcemaps and declarations
+src/**/*.js
+src/**/*.map
+
 .idea/
