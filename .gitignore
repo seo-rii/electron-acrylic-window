@@ -107,7 +107,7 @@ dist
 build/
 
 # TypeScript sourcemaps and declarations
-src/**/*.js
-src/**/*.map
+test/test.js
+test/test.js.map
 
 .idea/
