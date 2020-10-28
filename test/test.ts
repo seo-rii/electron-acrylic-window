@@ -1,5 +1,5 @@
 import { BrowserWindow, Vibrancy } from '../build'
-import debug from '../build/debug'
+import { toggleDebugging as debug } from '../build/debug'
 import { app } from 'electron'
 import * as os from 'os'
 import * as path from 'path'
@@ -9,6 +9,9 @@ let win: BrowserWindow;
 const isWindows10 = process.platform === 'win32' && os.release().split('.')[0] === '10'
 
 function createWindow() {
+	// activate debugging
+	debug(true)
+
 	let vibrancyOp: Vibrancy;
 
 	if (isWindows10)
