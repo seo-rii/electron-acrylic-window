@@ -184,15 +184,14 @@ export function getConfigFromOptions(vibrancyOptions: Vibrancy | undefined): Vib
 		config.effect = 1;
 
 	// Debug output
-	if (debug)
-		console.log(config)
+	debug(config)
 
 	return config;
 }
 
 export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
 	if (config && config.colors) {
-		if (debug) console.log("Vibrancy On", config)
+		debug("Vibrancy On", config)
 		bindings.setVibrancy(getHwnd(win), config.effect, config.colors.r, config.colors.g, config.colors.b, win.__electron_acrylic_window__.vibrnacyConfig.currentOpacity);
 		win.__electron_acrylic_window__.vibrancyActivated = true;
 		setTimeout(() => {
@@ -203,7 +202,7 @@ export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
 			}
 		}, 50);
 	} else {
-		if (debug) console.log("Vibrancy Off", config, win.__electron_acrylic_window__.vibrnacyConfig)
+		debug("Vibrancy Off", config, win.__electron_acrylic_window__.vibrnacyConfig)
 		win.__electron_acrylic_window__.vibrancyActivated = false;
 		if (win.__electron_acrylic_window__.vibrnacyConfig) {
 			win.setBackgroundColor((win.__electron_acrylic_window__.vibrnacyConfig && win.__electron_acrylic_window__.vibrnacyConfig.colors ? "#FE" + win.__electron_acrylic_window__.vibrnacyConfig.colors.r + win.__electron_acrylic_window__.vibrnacyConfig.colors.g + win.__electron_acrylic_window__.vibrnacyConfig.colors.b : "#000000"));
