@@ -5,6 +5,6 @@ export default function debug(...msgs: (string | unknown)[]) {
 	console.log(...msgs)
 }
 
-export function toggleDebugging() {
-
+export function toggleDebugging(debug: boolean) {
+	_debug = debug
 }
