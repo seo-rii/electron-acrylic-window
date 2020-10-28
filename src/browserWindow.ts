@@ -28,11 +28,37 @@ export interface AcrylicBrowserWindowConstructorOptions extends _AcrylicBrowserW
 export interface WindowConfig {
 	vibrancyActivated: boolean
 	vibrnacyConfig: VibrancyConfig
+
+	/**
+	 * Property designed to control the transparency of the focus.
+	 * TargetOpacity is the opacity that Windows should have.
+	 */
 	targetOpacity: number
+
+	/**
+	 * user-set opacity
+	 */
 	opacity: number
-	opacityInterval: any
+
+	/**
+	 * Property designed to control the transparency of the focus.
+	 * The id of the interval for smooth transition of currentOpacity to targetOpacity when focus changes.
+	 * The reason for saving this is to call clearInterval after the conversion is complete.
+	 */
+	opacityInterval: NodeJS.Timeout | undefined
+
+	/**
+	 * Property designed to control the transparency of the focus.
+	 * CurrentOpacity is the transparency value that Windows actually has currently.
+	 */
 	currentOpacity: number
-	moveTimeout: any
+
+	/**
+	 * Property designed to control the movement of the window
+	 * The id of the interval for tracking window movement
+	 * The reason for saving this is to call clearInterval after the conversion is complete.
+	 */
+	moveTimeout: NodeJS.Timeout | undefined
 }
 
 /**
@@ -70,7 +96,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 		moveTimeout: undefined
 	}
 
-	get __electron_acrylic_window__() : WindowConfig {
+	get __electron_acrylic_window__(): WindowConfig {
 		return this.#winconfig;
 	}
 
@@ -107,8 +133,9 @@ export class BrowserWindow extends electron.BrowserWindow {
 								let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
 								if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
 									this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-									clearInterval(this.#winconfig.opacityInterval)
-									this.#winconfig.opacityInterval = 0
+									if (this.#winconfig.opacityInterval)
+										clearInterval(this.#winconfig.opacityInterval)
+									this.#winconfig.opacityInterval = undefined
 								} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
 								else this.#winconfig.currentOpacity += colorDiff
 								_setVibrancy(this, this.#winconfig.vibrnacyConfig)
@@ -128,7 +155,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 								let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
 								if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
 									this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-									clearInterval(this.#winconfig.opacityInterval)
+									if (this.#winconfig.opacityInterval)
+										clearInterval(this.#winconfig.opacityInterval)
 									this.#winconfig.opacityInterval = undefined
 								} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
 								else this.#winconfig.currentOpacity += colorDiff
