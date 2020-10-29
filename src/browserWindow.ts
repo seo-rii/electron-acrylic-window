@@ -76,11 +76,19 @@ export class BrowserWindow extends electron.BrowserWindow {
 	setVibrancy(options?: Vibrancy) {
 		if (options) {
 			this.#winconfig.vibrnacyConfig = getConfigFromOptions(options);
+			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
 			_setVibrancy(this, this.#winconfig.vibrnacyConfig);
 		} else {
 			// If disabling vibrancy, turn off then save
 			_setVibrancy(this)
 			this.#winconfig.vibrnacyConfig = getConfigFromOptions(undefined);
+			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
 		}
 	}
 
@@ -106,70 +114,21 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 	constructor(private options?: AcrylicBrowserWindowConstructorOptions) {
 
-		super(Object.assign({...options}, {vibrancy: undefined}))
+		super(Object.assign({...options}, {vibrancy: undefined, show: false}))
 
 		void this.__electron_acrylic_window__
 
 		let config = getConfigFromOptions(options?.vibrancy);
+		let opShowOriginal = options?.show
 
-		if (isWindows10 && options && options.vibrancy !== undefined)
-			options.vibrancy = undefined
 
 		if (isWindows10 && config) {
-			if (config.colors.base)
-				this.setBackgroundColor(rgbToHex(config.colors.base))
-		}
+			if (config.colors.base) this.setBackgroundColor(rgbToHex(config.colors.base))
 
-		if (isWindows10 && config && config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate)
-
-		if (config && config.disableOnBlur) {
-			this.#winconfig.opacity = 0
-
-			this.on('blur', () => {
-				if (isWindows10 && this.#winconfig) {
-					this.#winconfig.targetOpacity = 255
-					if (!this.#winconfig.opacityInterval)
-						this.#winconfig.opacityInterval = setInterval(() => {
-							try {
-								let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
-								if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
-									this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-									if (this.#winconfig.opacityInterval)
-										clearInterval(this.#winconfig.opacityInterval)
-									this.#winconfig.opacityInterval = undefined
-								} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
-								else this.#winconfig.currentOpacity += colorDiff
-								this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
-								_setVibrancy(this, this.#winconfig.vibrnacyConfig)
-							} catch (e) {
-
-							}
-						}, 1000 / 30)
-				}
-			})
-
-			this.on('focus', () => {
-				if (isWindows10 && this.#winconfig) {
-					this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
-					if (!this.#winconfig.opacityInterval)
-						this.#winconfig.opacityInterval = setInterval(() => {
-							try {
-								let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
-								if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
-									this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-									if (this.#winconfig.opacityInterval)
-										clearInterval(this.#winconfig.opacityInterval)
-									this.#winconfig.opacityInterval = undefined
-								} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
-								else this.#winconfig.currentOpacity += colorDiff
-								this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
-								_setVibrancy(this, this.#winconfig.vibrnacyConfig)
-							} catch (e) {
-
-							}
-						}, 1000 / 30)
-				}
-			})
+			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
 
 			this.webContents.on('devtools-closed', () => {
 				_setVibrancy(this)
@@ -177,6 +136,65 @@ export class BrowserWindow extends electron.BrowserWindow {
 					_setVibrancy(this, this.#winconfig.vibrnacyConfig)
 				}, 100)
 			})
+
+			this.once('ready-to-show', () => {
+				setTimeout(() => {
+					if (opShowOriginal) this.show()
+					_setVibrancy(this, this.#winconfig.vibrnacyConfig)
+				}, 100)
+			})
+
+			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate)
+
+			if (config.disableOnBlur) {
+				this.#winconfig.opacity = 0
+
+				this.on('blur', () => {
+					if (isWindows10 && this.#winconfig) {
+						this.#winconfig.targetOpacity = 255
+						if (!this.#winconfig.opacityInterval)
+							this.#winconfig.opacityInterval = setInterval(() => {
+								try {
+									let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
+									if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
+										this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
+										if (this.#winconfig.opacityInterval)
+											clearInterval(this.#winconfig.opacityInterval)
+										this.#winconfig.opacityInterval = undefined
+									} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
+									else this.#winconfig.currentOpacity += colorDiff
+									this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
+									_setVibrancy(this, this.#winconfig.vibrnacyConfig)
+								} catch (e) {
+
+								}
+							}, 1000 / 30)
+					}
+				})
+
+				this.on('focus', () => {
+					if (isWindows10 && this.#winconfig) {
+						this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+						if (!this.#winconfig.opacityInterval)
+							this.#winconfig.opacityInterval = setInterval(() => {
+								try {
+									let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
+									if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
+										this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
+										if (this.#winconfig.opacityInterval)
+											clearInterval(this.#winconfig.opacityInterval)
+										this.#winconfig.opacityInterval = undefined
+									} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
+									else this.#winconfig.currentOpacity += colorDiff
+									this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
+									_setVibrancy(this, this.#winconfig.vibrnacyConfig)
+								} catch (e) {
+
+								}
+							}, 1000 / 30)
+					}
+				})
+			}
 		}
 	}
 }
