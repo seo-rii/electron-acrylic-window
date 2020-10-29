@@ -1,7 +1,8 @@
 import {VerticalRefreshRateContext} from 'win32-displayconfig'
 import {BrowserWindow} from './browserWindow'
 import * as electron from 'electron'
-import debug from './debug'
+import process from 'process'
+import debug from "./debug";
 
 function sleep(duration: number) {
 	return new Promise(resolve => setTimeout(resolve, duration));
@@ -28,10 +29,7 @@ function isInSnapZone(): boolean {
 	const display = electron.screen.getDisplayNearestPoint(point)
 
 	// Check if cursor is near the left/right edge of the active display
-	if ((point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20)) {
-		return true
-	}
-	return false
+	return (point.x > display.bounds.x - 20 && point.x < display.bounds.x + 20) || (point.x > display.bounds.x + display.bounds.width - 20 && point.x < display.bounds.x + display.bounds.width + 20);
 }
 
 /**
@@ -56,12 +54,12 @@ function isInSnapZone(): boolean {
  * It handles multiple displays with varying vertical sync rates,
  * and changes to the display configuration while this process is running.
  */
-export default function win10refresh(win: BrowserWindow, maximumRefreshRate: number | undefined) {
-	const refreshCtx = new VerticalRefreshRateContext();
+export default function win10refresh(win: BrowserWindow, maximumRefreshRate: number) {
+	const refreshCtx = new VerticalRefreshRateContext()
 
 	function getRefreshRateAtCursor(cursor: Partial<electron.Rectangle> & electron.Point) {
-		cursor = cursor || electron.screen.getCursorScreenPoint();
-		return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y);
+		cursor = cursor || electron.screen.getCursorScreenPoint()
+		return refreshCtx.findVerticalRefreshRateForDisplayPoint(cursor.x, cursor.y)
 	}
 
 	// Ensure all movement operation is serialized, by setting up a continuous promise chain
@@ -70,114 +68,109 @@ export default function win10refresh(win: BrowserWindow, maximumRefreshRate: num
 	//     boundsPromise = boundsPromise.then(() => { /* work */ })
 	//
 	// So that there are no asynchronous race conditions.
-	let pollingRate: number;
-	let doFollowUpQuery = false, isMoving = false, shouldMove = false;
-	let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
+	let pollingRate: number
+	let doFollowUpQuery = false, isMoving = false, shouldMove = false
+	let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0)
 	let lastWillMoveBounds: electron.Rectangle, lastWillResizeBounds: electron.Rectangle,
-		desiredMoveBounds: electron.Rectangle | undefined;
-	let boundsPromise: Promise<void> = Promise.race([
-		// Test if support for refreshCtx.findVerticalRefreshRateForDisplayPoint
-		// is supported
-		getRefreshRateAtCursor({width: 0, height: 0, x: 0, y: 0}).then(rate => {
-			pollingRate = rate ?? 30;
-			doFollowUpQuery = true;
+		desiredMoveBounds: electron.Rectangle | undefined
+	let boundsPromise: any = Promise.race([
+		getRefreshRateAtCursor(electron.screen.getCursorScreenPoint()).then(rate => {
+			pollingRate = rate || 30
+			doFollowUpQuery = true
 		}),
 		// Establishing the display configuration can fail; we can't
 		// just block forever if that happens. Instead, establish
 		// a fallback polling rate and hope for the best.
 		sleep(2000).then(() => {
-			pollingRate = pollingRate ?? 30;
+			pollingRate = pollingRate || 30
 		})
-	]);
+	])
 
-	function doFollowUpQueryIfNecessary(cursor: Partial<electron.Rectangle> & electron.Point) {
-		return async function () {
-			if (doFollowUpQuery) {
-				const rate = await getRefreshRateAtCursor(cursor ?? {x: 0, y: 0});
-				if (rate != pollingRate) debug(`New polling rate: ${rate}`)
-				pollingRate = rate || 30;
-			}
+	async function doFollowUpQueryIfNecessary(cursor: Partial<electron.Rectangle> & electron.Point) {
+		if (doFollowUpQuery) {
+			const rate = await getRefreshRateAtCursor(cursor)
+			if (rate != pollingRate) debug(`New polling rate: ${rate}`)
+			pollingRate = rate || 30
 		}
 	}
 
 	function setWindowBounds(bounds: electron.Rectangle) {
-		if (win.isDestroyed()) {
-			return;
-		}
-		win.setBounds(bounds);
-		desiredMoveBounds = win.getBounds();
+		if (win.isDestroyed()) return
+		win.setBounds(bounds)
+		desiredMoveBounds = win.getBounds()
 	}
 
 	function currentTimeBeforeNextActivityWindow(lastTime: bigint, forceFreq?: number) {
-		return process.hrtime.bigint() < lastTime + hrtimeDeltaForFrequency(forceFreq ?? pollingRate ?? 30);
+		return process.hrtime.bigint() <
+			lastTime + hrtimeDeltaForFrequency(forceFreq || pollingRate || 30)
 	}
 
-	function guardingAgainstMoveUpdate(fn: () => void) {
+	function guardingAgainstMoveUpdate(fn: any) {
 		if (pollingRate === undefined || !currentTimeBeforeNextActivityWindow(moveLastUpdate)) {
-			moveLastUpdate = process.hrtime.bigint();
-			fn();
-			return true;
+			moveLastUpdate = process.hrtime.bigint()
+			fn()
+			return true
 		} else {
-			return false;
+			return false
 		}
 	}
 
 	win.on('will-move', (e, newBounds) => {
-		if (win.__electron_acrylic_window__.opacityInterval) return;
+		if (win.__electron_acrylic_window__.opacityInterval) return
 		// We get a _lot_ of duplicate bounds sent to us in this event.
 		// This messes up our timing quite a bit.
 		if (lastWillMoveBounds !== undefined && areBoundsEqual(lastWillMoveBounds, newBounds)) {
-			e.preventDefault();
-			return;
+			e.preventDefault()
+			return
 		}
 		if (lastWillMoveBounds) {
-			newBounds.width = lastWillMoveBounds.width;
-			newBounds.height = lastWillMoveBounds.height;
+			newBounds.width = lastWillMoveBounds.width
+			newBounds.height = lastWillMoveBounds.height
 		}
-		lastWillMoveBounds = newBounds;
+		lastWillMoveBounds = newBounds
 		// If we're asked to perform some move update and it's under
 		// the refresh speed limit, we can just do it immediately.
 		// This also catches moving windows with the keyboard.
 		const didOptimisticMove = !isMoving && guardingAgainstMoveUpdate(() => {
 			// Do nothing, the default behavior of the event is exactly what we want.
-			desiredMoveBounds = undefined;
-		});
+			desiredMoveBounds = undefined
+		})
 		if (didOptimisticMove) {
-			boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary(electron.screen.getCursorScreenPoint()));
-			return;
+			boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary)
+			return
 		}
-		e.preventDefault();
+		e.preventDefault()
 
 		// Track if the user is moving the window
-		if (win.__electron_acrylic_window__.moveTimeout) clearTimeout(win.__electron_acrylic_window__.moveTimeout);
+		if (win.__electron_acrylic_window__.moveTimeout) clearTimeout(win.__electron_acrylic_window__.moveTimeout)
 		win.__electron_acrylic_window__.moveTimeout = setTimeout(() => {
-			shouldMove = false;
-		}, 1000 / Math.min(pollingRate, maximumRefreshRate ?? Infinity));
+			shouldMove = false
+		}, 1000 / Math.min(pollingRate, maximumRefreshRate))
 
 		// Disable next event ('move') if cursor is near the screen edge
 		disableJitterFix = isInSnapZone()
 
 		// Start new behavior if not already
 		if (!shouldMove) {
-			shouldMove = true;
+			shouldMove = true
 
-			if (isMoving) return false;
-			isMoving = true;
+			if (isMoving) return false
+			isMoving = true
 
 			// Get start positions
-			const basisBounds = win.getBounds();
-			const basisCursor = electron.screen.getCursorScreenPoint();
+			const basisBounds = win.getBounds()
+			const basisCursor = electron.screen.getCursorScreenPoint()
 
 			// Handle polling at a slower interval than the setInterval handler
 			function handleIntervalTick(moveInterval: any) {
-				boundsPromise = boundsPromise.then(() => new Promise<void>((resolve, reject) => {
+				boundsPromise = boundsPromise.then(() => {
 					if (!shouldMove) {
-						isMoving = false;
-						clearInterval(moveInterval);
-						return;
+						isMoving = false
+						clearInterval(moveInterval)
+						return
 					}
 
-					const cursor = electron.screen.getCursorScreenPoint();
+					const cursor = electron.screen.getCursorScreenPoint()
 					const didIt = guardingAgainstMoveUpdate(() => {
 						// Set new position
 						if (lastWillResizeBounds && lastWillResizeBounds.width) setWindowBounds({
@@ -185,32 +178,32 @@ export default function win10refresh(win: BrowserWindow, maximumRefreshRate: num
 							y: Math.floor(basisBounds.y + (cursor.y - basisCursor.y)),
 							width: Math.floor(lastWillResizeBounds.width / electron.screen.getDisplayMatching(basisBounds).scaleFactor),
 							height: Math.floor(lastWillResizeBounds.height / electron.screen.getDisplayMatching(basisBounds).scaleFactor)
-						});
+						})
 						else setWindowBounds({
 							x: Math.floor(basisBounds.x + (cursor.x - basisCursor.x)),
 							y: Math.floor(basisBounds.y + (cursor.y - basisCursor.y)),
 							width: Math.floor(lastWillMoveBounds.width / electron.screen.getDisplayMatching(basisBounds).scaleFactor),
 							height: Math.floor(lastWillMoveBounds.height / electron.screen.getDisplayMatching(basisBounds).scaleFactor)
-						});
-					});
+						})
+					})
 					if (didIt) {
-						doFollowUpQueryIfNecessary(cursor)().then(resolve).catch(reject);
+						return doFollowUpQueryIfNecessary(cursor)
 					}
-				}));
+				})
 			}
 
 			// Poll at 600hz while moving window
-			const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600);
+			const moveInterval = setInterval(() => handleIntervalTick(moveInterval), 1000 / 600)
 		}
-	});
+	})
 
 	win.on('move', (e: electron.Event) => {
 		if (disableJitterFix) {
-			return false;
+			return false
 		}
 		if (isMoving || win.isDestroyed()) {
-			e.preventDefault();
-			return false;
+			e.preventDefault()
+			return false
 		}
 		// As insane as this sounds, Electron sometimes reacts to prior
 		// move events out of order. Specifically, if you have win.setBounds()
@@ -221,45 +214,45 @@ export default function win10refresh(win: BrowserWindow, maximumRefreshRate: num
 		// window back into place just to spite Electron. Yes, there's a shiver.
 		// No, there's not much we can do about it until Electron gets their act together.
 		if (desiredMoveBounds !== undefined) {
-			const forceBounds = desiredMoveBounds;
-			desiredMoveBounds = undefined;
+			const forceBounds = desiredMoveBounds
+			desiredMoveBounds = undefined
 			win.setBounds({
 				x: Math.floor(forceBounds.x),
 				y: Math.floor(forceBounds.y),
 				width: Math.floor(forceBounds.width),
 				height: Math.floor(forceBounds.height)
-			});
+			})
 		}
-	});
+	})
 
 	win.on('will-resize', (e, newBounds) => {
 		if (lastWillResizeBounds !== undefined && areBoundsEqual(lastWillResizeBounds, newBounds)) {
-			e.preventDefault();
-			return;
+			e.preventDefault()
+			return
 		}
 
-		lastWillResizeBounds = newBounds;
+		lastWillResizeBounds = newBounds
 
 		// 60 Hz ought to be enough... for resizes.
 		// Some systems have trouble going 120 Hz, so we'll just take the lower
 		// of the current pollingRate and 60 Hz.
 		if (pollingRate !== undefined &&
-			currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, maximumRefreshRate ?? Infinity))) {
-			e.preventDefault();
-			return false;
+			currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, maximumRefreshRate))) {
+			e.preventDefault()
+			return false
 		}
 		// We have to count this twice: once before the resize,
 		// and once after the resize. We actually don't have any
 		// timing control around _when_ the resize happened, so
 		// we have to be pessimistic.
-		resizeLastUpdate = process.hrtime.bigint();
-	});
+		resizeLastUpdate = process.hrtime.bigint()
+	})
 
 	win.on('resize', () => {
-		resizeLastUpdate = process.hrtime.bigint();
-		boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary(electron.screen.getCursorScreenPoint()));
-	});
+		resizeLastUpdate = process.hrtime.bigint()
+		boundsPromise = boundsPromise.then(doFollowUpQueryIfNecessary)
+	})
 
 	// Close the VerticalRefreshRateContext so Node can exit cleanly
-	win.on('closed', refreshCtx.close);
+	win.on('closed', refreshCtx.close)
 }

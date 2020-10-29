@@ -150,7 +150,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 			toggleDebugging(this.#winconfig.debug)
 
-			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate)
+			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate || 60)
 
 			if (config.disableOnBlur) {
 				this.#winconfig.opacity = 0

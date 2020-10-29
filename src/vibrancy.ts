@@ -177,9 +177,6 @@ export function getConfigFromOptions(vibrancyOptions: Vibrancy | undefined): Vib
 	if (options.effect === 'acrylic' && isRS4OrGreater)
 		config.effect = 1;
 
-	// Debug output
-	debug(config)
-
 	return config;
 }
 
