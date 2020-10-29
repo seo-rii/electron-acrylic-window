@@ -1,6 +1,7 @@
 import * as electron from 'electron'
 import {_setVibrancy, getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig} from './vibrancy';
 import {isWindows10} from './os';
+import win10refresh from './win10refresh'
 
 /**
  * Allow modifying default BrowserWindowConstructorOptions
@@ -118,8 +119,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 				this.setBackgroundColor(rgbToHex(config.colors.base))
 		}
 
-		if (isWindows10 && config && config.useCustomWindowRefreshMethod) {
-		}
+		if (isWindows10 && config && config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate)
 
 		if (config && config.disableOnBlur) {
 			this.#winconfig.opacity = 0
@@ -168,6 +168,13 @@ export class BrowserWindow extends electron.BrowserWindow {
 							}
 						}, 1000 / 30)
 				}
+			})
+
+			this.webContents.on('devtools-closed', () => {
+				_setVibrancy(this)
+				setTimeout(() => {
+					_setVibrancy(this, this.#winconfig.vibrnacyConfig)
+				}, 100)
 			})
 		}
 	}

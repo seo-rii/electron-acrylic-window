@@ -1,6 +1,6 @@
-import { BrowserWindow, Vibrancy } from '../build'
-import { toggleDebugging as debug } from '../build/debug'
-import { app } from 'electron'
+import {BrowserWindow, Vibrancy} from '../build'
+import {toggleDebugging as debug} from '../build/debug'
+import {app} from 'electron'
 import * as os from 'os'
 import * as path from 'path'
 
@@ -16,7 +16,7 @@ function createWindow() {
 
 	if (isWindows10)
 		vibrancyOp = {
-			theme: { hex: '#661237cc' },
+			theme: '#661237cc',
 			effect: 'acrylic',
 			useCustomWindowRefreshMethod: true,
 			disableOnBlur: true

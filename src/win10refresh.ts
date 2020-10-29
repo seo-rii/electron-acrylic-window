@@ -1,7 +1,7 @@
-import { VerticalRefreshRateContext } from 'win32-displayconfig'
-import { BrowserWindow, WindowConfig } from './browserWindow';
+import {VerticalRefreshRateContext} from 'win32-displayconfig'
+import {BrowserWindow} from './browserWindow'
 import * as electron from 'electron'
-import { Vibrancy, VibrancyConfig } from './vibrancy';
+import debug from './debug'
 
 function sleep(duration: number) {
 	return new Promise(resolve => setTimeout(resolve, duration));
@@ -56,7 +56,7 @@ function isInSnapZone() {
  * It handles multiple displays with varying vertical sync rates,
  * and changes to the display configuration while this process is running.
  */
-export default function win10refresh(win: BrowserWindow, config: VibrancyConfig, debug: boolean) {
+export default function win10refresh(win: BrowserWindow, maximumRefreshRate: number | undefined) {
 	const refreshCtx = new VerticalRefreshRateContext();
 
 	function getRefreshRateAtCursor(cursor: Partial<electron.Rectangle> & electron.Point) {
@@ -73,11 +73,12 @@ export default function win10refresh(win: BrowserWindow, config: VibrancyConfig,
 	let pollingRate: number;
 	let doFollowUpQuery = false, isMoving = false, shouldMove = false;
 	let moveLastUpdate = BigInt(0), resizeLastUpdate = BigInt(0);
-	let lastWillMoveBounds: electron.Rectangle, lastWillResizeBounds: electron.Rectangle, desiredMoveBounds: electron.Rectangle | undefined;
+	let lastWillMoveBounds: electron.Rectangle, lastWillResizeBounds: electron.Rectangle,
+		desiredMoveBounds: electron.Rectangle | undefined;
 	let boundsPromise: Promise<void> = Promise.race([
 		// Test if support for refreshCtx.findVerticalRefreshRateForDisplayPoint
 		// is supported
-		getRefreshRateAtCursor({ width: 0, height: 0, x: 0, y: 0 }).then(rate => {
+		getRefreshRateAtCursor({width: 0, height: 0, x: 0, y: 0}).then(rate => {
 			pollingRate = rate ?? 30;
 			doFollowUpQuery = true;
 		}),
@@ -90,10 +91,10 @@ export default function win10refresh(win: BrowserWindow, config: VibrancyConfig,
 	]);
 
 	function doFollowUpQueryIfNecessary(cursor: Partial<electron.Rectangle> & electron.Point) {
-		return async function() {
+		return async function () {
 			if (doFollowUpQuery) {
-				const rate = await getRefreshRateAtCursor(cursor ?? { x: 0, y: 0 });
-				if (debug && rate != pollingRate) console.log(`New polling rate: ${rate}`)
+				const rate = await getRefreshRateAtCursor(cursor ?? {x: 0, y: 0});
+				if (rate != pollingRate) debug(`New polling rate: ${rate}`)
 				pollingRate = rate || 30;
 			}
 		}
@@ -151,7 +152,7 @@ export default function win10refresh(win: BrowserWindow, config: VibrancyConfig,
 		if (win.__electron_acrylic_window__.moveTimeout) clearTimeout(win.__electron_acrylic_window__.moveTimeout);
 		win.__electron_acrylic_window__.moveTimeout = setTimeout(() => {
 			shouldMove = false;
-		}, 1000 / Math.min(pollingRate, config.maximumRefreshRate ?? Infinity));
+		}, 1000 / Math.min(pollingRate, maximumRefreshRate ?? Infinity));
 
 		// Disable next event ('move') if cursor is near the screen edge
 		disableJitterFix = isInSnapZone()
@@ -243,7 +244,7 @@ export default function win10refresh(win: BrowserWindow, config: VibrancyConfig,
 		// Some systems have trouble going 120 Hz, so we'll just take the lower
 		// of the current pollingRate and 60 Hz.
 		if (pollingRate !== undefined &&
-			currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, config.maximumRefreshRate ?? Infinity))) {
+			currentTimeBeforeNextActivityWindow(resizeLastUpdate, Math.min(pollingRate, maximumRefreshRate ?? Infinity))) {
 			e.preventDefault();
 			return false;
 		}

@@ -88,25 +88,16 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
 	if (theme === 'dark')
 		return dark
 
-	if (typeof theme === 'object') {
-		if (theme.hex) {
-			const r = hexTo255(theme.hex.slice(0, 2));
-			const g = hexTo255(theme.hex.slice(2, 4));
-			const b = hexTo255(theme.hex.slice(4, 6));
-			const a = hexTo255(theme.hex.slice(6, 8));
+	if (typeof theme === 'string') {
+		const r = hexTo255(theme.slice(1, 3));
+		const g = hexTo255(theme.slice(3, 5));
+		const b = hexTo255(theme.slice(5, 7));
+		const a = hexTo255(theme.slice(7, 9));
 
-			if (!(r && g && b && a))
-				return light
+		if (!(r && g && b && a))
+			return light
 
-			return {r, g, b, a}
-		} else if (theme.rgba) {
-			return {
-				r: theme.rgba[0],
-				g: theme.rgba[1],
-				b: theme.rgba[2],
-				a: theme.rgba[3]
-			}
-		}
+		return {r: r, g: g, b: b, a: a}
 	}
 
 	return light
@@ -121,7 +112,7 @@ export type VibrancyTheme =
 	'light'
 	| 'dark'
 	| 'appearance-based'
-	| { hex?: string, rgba?: [number, number, number, number] };
+	| string
 
 /**
  * The effect to apply. Can be 'acrylic' or 'blur'.
