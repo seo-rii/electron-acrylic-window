@@ -144,6 +144,10 @@ export interface VibrancyOptions {
 	 * window lost focus.
 	 */
 	disableOnBlur?: boolean;
+	/**
+	 * If true, log will be printed to console.
+	 */
+	debug?: boolean;
 }
 
 export type Vibrancy = VibrancyTheme | VibrancyOptions

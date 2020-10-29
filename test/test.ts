@@ -19,7 +19,8 @@ function createWindow() {
 			theme: '#661237cc',
 			effect: 'acrylic',
 			useCustomWindowRefreshMethod: true,
-			disableOnBlur: true
+			disableOnBlur: true,
+			debug: true
 		};
 	else
 		vibrancyOp = 'dark';

@@ -7,7 +7,7 @@ function sleep(duration: number) {
 	return new Promise(resolve => setTimeout(resolve, duration));
 }
 
-function areBoundsEqual(/*unknown*/left: any, /*unknown*/right: any) {
+function areBoundsEqual(/*unknown*/left: any, /*unknown*/right: any): boolean {
 	return left.height === right.height
 		&& left.width === right.width
 		&& left.x === right.x
@@ -23,7 +23,7 @@ function hrtimeDeltaForFrequency(freq: number) {
 let disableJitterFix = false
 
 // Detect if cursor is near the screen edge. Used to disable the jitter fix in 'move' event.
-function isInSnapZone() {
+function isInSnapZone(): boolean {
 	const point = electron.screen.getCursorScreenPoint()
 	const display = electron.screen.getDisplayNearestPoint(point)
 

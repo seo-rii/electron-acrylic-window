@@ -1,10 +1,10 @@
 <p align="center"><img alt="logo" src="./logo.png" width="200"></p>
 
 <h1 align="center">electron-acrylic-window</h1>
-  
+
 [![Build Status](https://travis-ci.com/seo-rii/electron-acrylic-window.svg?branch=master)](https://travis-ci.com/seo-rii/electron-acrylic-window)
-[![Dependencies](https://david-dm.org/seo-rii/electron-acrylic-window.svg)](https://david-dm.org/seo-rii/electron-acrylic-window) 
-[![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)  
+[![Dependencies](https://david-dm.org/seo-rii/electron-acrylic-window.svg)](https://david-dm.org/seo-rii/electron-acrylic-window)
+[![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)
 
 Makes it simple to add the Windows 10 Acrylic effect to Electron applications, by acting as a wrapper for the standard Electron vibrancy feature.
 
@@ -61,7 +61,7 @@ win.setVibrancy([options]);
 
 Will call original `win.setVibrancy(op)` Electron function if OS is not Windows 10.
 
-There is no return value. If it fails to set vibrancy, it throws an error.  
+There is no return value. If it fails to set vibrancy, it throws an error.
 
 #### Errors
 - `WINDOW_NOT_GIVEN` - Error that occurs when `win` parameter is not passed.
@@ -75,8 +75,8 @@ If OS is not Windows 10, `[options]` will be passed on to the original vibrancy 
 On Windows 10, `[options]` should be a String or an Object.
 
 - **String**
-    
-    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`).  
+
+    Should be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`).
     Default is `'appearance-based'`.
 
 - **Object**
@@ -92,30 +92,34 @@ On Windows 10, `[options]` should be a String or an Object.
     ```
 
     - `theme` - String (optional)
-        
+
         Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`). Default is `'appearance-based'`
-    
+
     - `effect` - String (optional)
 
         Sets the type of Windows transparency effect, either `'acrylic'` or `'blur'`. Default is `'acrylic'`.
-        
+
         > **Setting this option to acrylic may cause performance degradation. Acrylic only works on Windows 10 RS3 or above, otherwise `'blur'` is forced.**
-    
+
     - `useCustomWindowRefreshMethod` - Boolean (optional)
-        
+
         Use custom window resize/move handler for performance. Default is `true`.
-        
-        Special thanks to [@djsweet](https://github.com/djsweet) and [@xanderfrangos](https://github.com/xanderfrangos).  
-        
+
+        Special thanks to [@djsweet](https://github.com/djsweet) and [@xanderfrangos](https://github.com/xanderfrangos).
+
         > **This is an experimental feature. May cause errors.**
-    
+
     - `maximumRefreshRate` - Number (optional)
 
         Maximum refresh rate of the application, in hertz. Default is `60`.
-    
+
     - `disableOnBlur` - Boolean (optional)
-        
+
         If true, acrylic effect will be disabled when the window loses focus, to mimic the behaviour of normal UWP apps. Default is `true`.
+
+    - `debug` - Boolean (optional)
+
+        If true, log will be printed to console.
 
 ## Demo
 

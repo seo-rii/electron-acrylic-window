@@ -2,6 +2,7 @@ import * as electron from 'electron'
 import {_setVibrancy, getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig} from './vibrancy';
 import {isWindows10} from './os';
 import win10refresh from './win10refresh'
+import {toggleDebugging} from "./debug";
 
 /**
  * Allow modifying default BrowserWindowConstructorOptions
@@ -59,6 +60,8 @@ export interface WindowConfig {
 	 * The reason for saving this is to call clearInterval after the conversion is complete.
 	 */
 	moveTimeout: NodeJS.Timeout | undefined
+
+	debug: boolean
 }
 
 /**
@@ -101,7 +104,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 		opacity: 0,
 		currentOpacity: 0,
 		opacityInterval: undefined,
-		moveTimeout: undefined
+		moveTimeout: undefined,
+		debug: false
 	}
 
 	get __electron_acrylic_window__(): WindowConfig {
@@ -143,6 +147,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 					_setVibrancy(this, this.#winconfig.vibrnacyConfig)
 				}, 100)
 			})
+
+			toggleDebugging(this.#winconfig.debug)
 
 			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate)
 
