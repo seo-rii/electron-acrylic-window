@@ -58,7 +58,6 @@ export function rgbToHex(rgb: RGB | RGBA) {
 }
 
 function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['colors'] {
-	const unkownTheme = typeof theme === 'string' && supportedType.indexOf(theme) === -1
 
 	const dark = {
 		r: _darkThemeColor[0],
@@ -73,14 +72,6 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
 		b: _lightThemeColor[2],
 		a: _lightThemeColor[3]
 	};
-
-	if (unkownTheme || theme === 'appearance-based') {
-		if (electron.nativeTheme.shouldUseDarkColors)
-			// dark
-			return dark
-		else
-			return light
-	}
 
 	if (theme === 'light')
 		return light
@@ -100,7 +91,10 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
 		return {r: r, g: g, b: b, a: a}
 	}
 
-	return light
+	if (electron.nativeTheme.shouldUseDarkColors)
+		return dark
+	else
+		return light
 }
 
 /**

@@ -105,7 +105,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 	}
 
 	constructor(private options?: AcrylicBrowserWindowConstructorOptions) {
-		super(Object.assign(options, {vibrancy: undefined}))
+
+		super(Object.assign({...options}, {vibrancy: undefined}))
 
 		void this.__electron_acrylic_window__
 
