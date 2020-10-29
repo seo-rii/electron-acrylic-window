@@ -19,7 +19,7 @@
 	"scripts": {
 		"build": "(node-gyp rebuild && npm run-script build-ts)",
 		"build-ts": "tsc",
-		"install": "node-gyp rebuild",
+		"install": "(node-gyp rebuild && npm run-script build-ts)",
 		"test": "tsc -p test && electron test/test.js"
 	},
 	"engines": {

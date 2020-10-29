@@ -20,7 +20,7 @@ function createWindow() {
 			effect: 'acrylic',
 			useCustomWindowRefreshMethod: true,
 			disableOnBlur: true,
-			debug: true
+			debug: false
 		};
 	else
 		vibrancyOp = 'dark';

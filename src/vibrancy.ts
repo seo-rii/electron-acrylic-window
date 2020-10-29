@@ -85,7 +85,7 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
 		const b = hexTo255(theme.slice(5, 7));
 		const a = hexTo255(theme.slice(7, 9));
 
-		if (!(r && g && b && a))
+		if (r === undefined || g === undefined || b === undefined || a === undefined)
 			return light
 
 		return {r: r, g: g, b: b, a: a}

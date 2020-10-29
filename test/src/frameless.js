@@ -46,8 +46,6 @@ window.updateVibrancy = (props = null) => {
         return false;
     }
 
-    // Enable vibrancy
-    const newProps = Object.assign(win._vibrancyOp || {}, (typeof props === "string" ? { theme: props } : props));
     win.setVibrancy(props)
     return true;
 }

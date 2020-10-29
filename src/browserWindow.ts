@@ -148,7 +148,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 				}, 100)
 			})
 
-			toggleDebugging(this.#winconfig.debug)
+			if (this.#winconfig.debug) toggleDebugging(this.#winconfig.debug)
 
 			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate || 60)
 
