@@ -1,7 +1,7 @@
 import bindings from './bindings'
-import { BrowserWindow } from './browserWindow'
+import {BrowserWindow} from './browserWindow'
 import debug from './debug'
-import { isRS4OrGreater, isWindows10 } from './os'
+import {isRS4OrGreater} from './os'
 import * as electron from 'electron'
 
 function getHwnd(win: BrowserWindow) {
@@ -12,6 +12,7 @@ function getHwnd(win: BrowserWindow) {
 		throw new TypeError('NOT_VALID_WINDOW')
 	}
 }
+
 const supportedType = ['light', 'dark', 'appearance-based']
 
 const _lightThemeColor: [221, 221, 221, 136] = [221, 221, 221, 136]
@@ -97,7 +98,7 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
 			if (!(r && g && b && a))
 				return light
 
-			return { r, g, b, a }
+			return {r, g, b, a}
 		} else if (theme.rgba) {
 			return {
 				r: theme.rgba[0],
@@ -116,7 +117,11 @@ function getColorsFromTheme(theme: VibrancyOptions['theme']): VibrancyConfig['co
  * 'dark', 'appearance-based' or a custom HEX color
  * with alpha.
  */
-export type VibrancyTheme = 'light' | 'dark' | 'appearance-based' | { hex?: string, rgba?: [number, number, number, number] };
+export type VibrancyTheme =
+	'light'
+	| 'dark'
+	| 'appearance-based'
+	| { hex?: string, rgba?: [number, number, number, number] };
 
 /**
  * The effect to apply. Can be 'acrylic' or 'blur'.
@@ -167,7 +172,7 @@ export function getConfigFromOptions(vibrancyOptions: Vibrancy | undefined): Vib
 		disableOnBlur: true
 	}
 
-	const options = Object.assign(defaultSettings, typeof vibrancyOptions === "object" ? vibrancyOptions : { theme: vibrancyOptions })
+	const options = Object.assign(defaultSettings, typeof vibrancyOptions === "object" ? vibrancyOptions : {theme: vibrancyOptions})
 
 	// Merge provided settings into defaults
 	let config: VibrancyConfig = {
