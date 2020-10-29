@@ -8,3 +8,5 @@ logo.png
 screenshots/
 test/
 index.ts
+.vscode/
+.editorconfig
