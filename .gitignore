@@ -111,3 +111,14 @@ test/test.js
 test/test.js.map
 
 .idea/
+build/
+node_modules/
+.git/
+.idea/
+.gitignore
+.travis.yml
+logo.png
+screenshots/
+test/
+.vscode/
+.editorconfig

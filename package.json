@@ -1,8 +1,8 @@
 {
 	"name": "electron-acrylic-window",
-	"version": "0.5.1",
+	"version": "0.5.4",
 	"description": "Add vibrancy effect for electron",
-	"main": "src/index.js",
+	"main": "build/index.js",
 	"keywords": [
 		"node",
 		"vibrancy",
@@ -46,5 +46,16 @@
 	"devDependencies": {
 		"electron": "^10.1.5",
 		"typescript": "^4.0.5"
-	}
+	},
+	"files": [
+		"/LICENSE",
+		"/README.md",
+		"/tsconfig.json",
+		"/package.json",
+		"/package-lock.json",
+		"/logo.png",
+		"/index.d.ts",
+		"/binding.gyp",
+		"src/**/*"
+	]
 }
