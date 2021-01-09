@@ -1,5 +1,5 @@
 import bindings from './bindings'
-import {BrowserWindow} from './browserWindow'
+import {BrowserWindow, WindowConfig} from './browserWindow'
 import debug from './debug'
 import {isRS4OrGreater} from './os'
 import * as electron from 'electron'
@@ -214,6 +214,9 @@ export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
  * @param options
  */
 export function setVibrancy(win: BrowserWindow, vibrancy: Vibrancy = 'appearance-based') {
+	// only .vibrnacyConfig is used
+	win.__electron_acrylic_window__ = win.__electron_acrylic_window__ || {} as WindowConfig
+
 	if (vibrancy) {
 		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(vibrancy);
 
