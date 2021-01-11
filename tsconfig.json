@@ -11,11 +11,12 @@
 		"rootDir": "src",
 		"skipLibCheck": true,
 		"esModuleInterop": true,
-		"outDir": "build"
+		"outDir": "build_ts"
 	},
 	"exclude": [
 		"node_modules",
 		"test",
-		"build"
+		"build",
+		"build_ts"
 	]
 }

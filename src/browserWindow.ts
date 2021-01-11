@@ -69,34 +69,7 @@ export interface WindowConfig {
  * The class handles the vibrancy effects.
  */
 export class BrowserWindow extends electron.BrowserWindow {
-	/**
-	 * Set the vibrancy for the specified window.
-	 *
-	 * @param options
-	 */
-	// https://github.com/microsoft/TypeScript/issues/30071
-	// @ts-ignore
-	setVibrancy(options?: Vibrancy) {
-		if (options) {
-			this.#winconfig.vibrnacyConfig = getConfigFromOptions(options);
-			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			_setVibrancy(this, this.#winconfig.vibrnacyConfig);
-		} else {
-			// If disabling vibrancy, turn off then save
-			_setVibrancy(this)
-			this.#winconfig.vibrnacyConfig = getConfigFromOptions(undefined);
-			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
-		}
-	}
-
 	#vibconfig = getConfigFromOptions(this.options?.vibrancy)
-
 	#winconfig: WindowConfig = {
 		targetOpacity: 0,
 		vibrancyActivated: false,
@@ -108,14 +81,6 @@ export class BrowserWindow extends electron.BrowserWindow {
 		debug: false
 	}
 
-	get __electron_acrylic_window__(): WindowConfig {
-		return this.#winconfig;
-	}
-
-	set __electron_acrylic_window__(v: WindowConfig) {
-		this.#winconfig = v;
-	}
-
 	constructor(private options?: AcrylicBrowserWindowConstructorOptions) {
 
 		super(Object.assign({...options}, {vibrancy: undefined, show: false}))
@@ -123,7 +88,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 		void this.__electron_acrylic_window__
 
 		let config = getConfigFromOptions(options?.vibrancy);
-		let opShowOriginal = options?.show
+		let opShowOriginal = options?.show ?? true
 
 
 		if (isWindows10 && config) {
@@ -201,6 +166,40 @@ export class BrowserWindow extends electron.BrowserWindow {
 					}
 				})
 			}
+		}
+	}
+
+	get __electron_acrylic_window__(): WindowConfig {
+		return this.#winconfig;
+	}
+
+	set __electron_acrylic_window__(v: WindowConfig) {
+		this.#winconfig = v;
+	}
+
+	/**
+	 * Set the vibrancy for the specified window.
+	 *
+	 * @param options
+	 */
+	// https://github.com/microsoft/TypeScript/issues/30071
+	// @ts-ignore
+	setVibrancy(options?: Vibrancy) {
+		if (options) {
+			this.#winconfig.vibrnacyConfig = getConfigFromOptions(options);
+			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			_setVibrancy(this, this.#winconfig.vibrnacyConfig);
+		} else {
+			// If disabling vibrancy, turn off then save
+			_setVibrancy(this)
+			this.#winconfig.vibrnacyConfig = getConfigFromOptions(undefined);
+			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
+			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
 		}
 	}
 }
