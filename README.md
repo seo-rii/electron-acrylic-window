@@ -57,7 +57,7 @@ setVibrancy(win, [options]);
 win.setVibrancy([options]);
 ```
 
-`win` should be frameles.
+`win` should be frameless.
 
 Will call original `win.setVibrancy(op)` Electron function if OS is not Windows 10.
 
