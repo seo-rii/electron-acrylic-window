@@ -6,7 +6,6 @@ node_modules/
 .travis.yml
 logo.png
 screenshots/
-test/
 .vscode/
 .editorconfig
 build/
