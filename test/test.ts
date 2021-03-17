@@ -32,11 +32,13 @@ function createWindow() {
 		webPreferences: {
 			nodeIntegration: true,
 			enableRemoteModule: true,
+			contextIsolation: false,
 		},
 		vibrancy: vibrancyOp,
 	})
 
 	win.loadFile(path.join(__dirname, 'test.html'))
+	win.webContents.openDevTools({ mode: 'detach' })
 
 	win.show()
 }

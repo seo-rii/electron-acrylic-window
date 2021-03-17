@@ -1,6 +1,5 @@
-const remote = require('electron').remote
-
 document.onreadystatechange = () => {
+	require('electron')
 	if (document.readyState == 'complete') {
 		win = require('electron').remote.getCurrentWindow()
 		handleWindowControls()
