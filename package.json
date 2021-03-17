@@ -20,7 +20,7 @@
 		"build": "(node-gyp rebuild && npm run-script build-ts)",
 		"build-ts": "npx tsc",
 		"install": "node-gyp rebuild",
-		"test": "electron test/test.js"
+		"test": "npx tsc -p test && electron test/test.js"
 	},
 	"engines": {
 		"node": ">=8.0.0"
