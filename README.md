@@ -15,12 +15,14 @@ Inspired by [electron-vibrancy](https://github.com/arkenthera/electron-vibrancy)
 <img alt="screenshot" src="./screenshots/5.png" width="50%"><img alt="screenshot" src="./screenshots/6.png" width="50%">
 
 ## Contributors
+
 Huge thanks to all contributors!
 <a href="https://github.com/Seo-Rii/electron-acrylic-window/graphs/contributors">
-  <img src="https://contributors-img.web.app/image?repo=Seo-Rii/electron-acrylic-window" />
+<img src="https://contributors-img.web.app/image?repo=Seo-Rii/electron-acrylic-window" />
 </a>
 
 ## Installation
+
 You will need Visual Studio or Visual C++ build tools to install this. An easy way to install them can be found [here](https://www.npmjs.com/package/windows-build-tools).
 
 ```shell script
@@ -30,6 +32,7 @@ npm i electron-acrylic-window --save
 ## Usage
 
 ### `BrowserWindow` - Wrapper class for `electron.BrowserWindow`
+
 Enables Vibrancy on the Electron window.
 
 ```js
@@ -45,16 +48,17 @@ win = new BrowserWindow({
 If OS is Windows 10, it overrides the constructor option and `BrowserWindow.setVibrancy` method to work properly on Windows 10. If OS is not Windows 10, it will work normally.
 
 ### `setVibrancy` - Wrapper function for `electron.BrowserWindow.setVibrancy`
+
 Enables Vibrancy on the Electron window.
 
 ```js
-const {setVibrancy} = require("electron-acrylic-window");
+const { setVibrancy } = require('electron-acrylic-window')
 
-setVibrancy(win, [options]);
+setVibrancy(win, [options])
 
 // OR
 
-win.setVibrancy([options]);
+win.setVibrancy([options])
 ```
 
 `win` should be frameless.
@@ -64,22 +68,24 @@ Will call original `win.setVibrancy(op)` Electron function if OS is not Windows 
 There is no return value. If it fails to set vibrancy, it throws an error.
 
 #### Errors
-- `WINDOW_NOT_GIVEN` - Error that occurs when `win` parameter is not passed.
-- `NOT_VALID_WINDOW` - Error that occurs when `win` parameter is not valid Electron window.
-- `FAIL_LOAD_DLL` - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
-- `UNKNOWN` - Other error.
+
+-   `WINDOW_NOT_GIVEN` - Error that occurs when `win` parameter is not passed.
+-   `NOT_VALID_WINDOW` - Error that occurs when `win` parameter is not valid Electron window.
+-   `FAIL_LOAD_DLL` - Error that occurs when fails to load SetWindowCompositionAttribute from user32.dll
+-   `UNKNOWN` - Other error.
 
 ### Options
+
 If OS is not Windows 10, `[options]` will be passed on to the original vibrancy function/option, so keep that in mind.
 
 On Windows 10, `[options]` should be a String or an Object.
 
-- **String**
+-   **String**
 
     Should be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`).
     Default is `'appearance-based'`.
 
-- **Object**
+-   **Object**
 
     ```javascript
     op = {
@@ -91,17 +97,17 @@ On Windows 10, `[options]` should be a String or an Object.
     }
     ```
 
-    - `theme` - String (optional)
+    -   `theme` - String (optional)
 
         Sets color of acrylic effect. Can be `'light'`, `'dark'`, `'appearance-based'` or a hex color code with alpha (`'#222222aa'`). Default is `'appearance-based'`
 
-    - `effect` - String (optional)
+    -   `effect` - String (optional)
 
         Sets the type of Windows transparency effect, either `'acrylic'` or `'blur'`. Default is `'acrylic'`.
 
         > **Setting this option to acrylic may cause performance degradation. Acrylic only works on Windows 10 RS3 or above, otherwise `'blur'` is forced.**
 
-    - `useCustomWindowRefreshMethod` - Boolean (optional)
+    -   `useCustomWindowRefreshMethod` - Boolean (optional)
 
         Use custom window resize/move handler for performance. Default is `true`.
 
@@ -109,15 +115,15 @@ On Windows 10, `[options]` should be a String or an Object.
 
         > **This is an experimental feature. May cause errors.**
 
-    - `maximumRefreshRate` - Number (optional)
+    -   `maximumRefreshRate` - Number (optional)
 
         Maximum refresh rate of the application, in hertz. Default is `60`.
 
-    - `disableOnBlur` - Boolean (optional)
+    -   `disableOnBlur` - Boolean (optional)
 
         If true, acrylic effect will be disabled when the window loses focus, to mimic the behaviour of normal UWP apps. Default is `true`.
 
-    - `debug` - Boolean (optional)
+    -   `debug` - Boolean (optional)
 
         If true, log will be printed to console.
 

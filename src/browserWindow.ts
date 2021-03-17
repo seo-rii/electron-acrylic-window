@@ -1,30 +1,39 @@
 import * as electron from 'electron'
-import {_setVibrancy, getConfigFromOptions, rgbToHex, Vibrancy, VibrancyConfig} from './vibrancy';
-import {isWindows10} from './os';
+import {
+	_setVibrancy,
+	getConfigFromOptions,
+	rgbToHex,
+	Vibrancy,
+	VibrancyConfig,
+} from './vibrancy'
+import { isWindows10 } from './os'
 import win10refresh from './win10refresh'
-import {toggleDebugging} from "./debug";
+import { toggleDebugging } from './debug'
 
 /**
  * Allow modifying default BrowserWindowConstructorOptions
  * to change vibrancy to VibrancyOptions.
  */
-type Modify<T, R> = Omit<T, keyof R> & R;
+type Modify<T, R> = Omit<T, keyof R> & R
 
-type _AcrylicBrowserWindowConstructorOptions = Modify<electron.BrowserWindowConstructorOptions, {
-	/**
-	 * The vibrancy settings for the window. Can be
-	 * a VibrancyTheme or the VibrancyOptions object.
-	 */
-	vibrancy?: Vibrancy
-}>;
+type _AcrylicBrowserWindowConstructorOptions = Modify<
+	electron.BrowserWindowConstructorOptions,
+	{
+		/**
+		 * The vibrancy settings for the window. Can be
+		 * a VibrancyTheme or the VibrancyOptions object.
+		 */
+		vibrancy?: Vibrancy
+	}
+>
 
 /**
  * The options of the BrowserWindow constructor including the vibrancy options.
  */
 // The intelisense of type _AcrylicBrowserWindowConstructorOptions is shown as the raw type, instead of the actual type name.
 // tslint:disable-next-line
-export interface AcrylicBrowserWindowConstructorOptions extends _AcrylicBrowserWindowConstructorOptions {
-}
+export interface AcrylicBrowserWindowConstructorOptions
+	extends _AcrylicBrowserWindowConstructorOptions {}
 
 export interface WindowConfig {
 	vibrancyActivated: boolean
@@ -78,21 +87,22 @@ export class BrowserWindow extends electron.BrowserWindow {
 		currentOpacity: 0,
 		opacityInterval: undefined,
 		moveTimeout: undefined,
-		debug: false
+		debug: false,
 	}
 
 	constructor(private options?: AcrylicBrowserWindowConstructorOptions) {
-
-		super(Object.assign({...options}, {vibrancy: undefined, show: false}))
+		super(
+			Object.assign({ ...options }, { vibrancy: undefined, show: false })
+		)
 
 		void this.__electron_acrylic_window__
 
-		let config = getConfigFromOptions(options?.vibrancy);
+		let config = getConfigFromOptions(options?.vibrancy)
 		let opShowOriginal = options?.show ?? true
 
-
 		if (isWindows10 && config) {
-			if (config.colors.base) this.setBackgroundColor(rgbToHex(config.colors.base))
+			if (config.colors.base)
+				this.setBackgroundColor(rgbToHex(config.colors.base))
 
 			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
@@ -115,7 +125,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 			if (this.#winconfig.debug) toggleDebugging(this.#winconfig.debug)
 
-			if (config.useCustomWindowRefreshMethod) win10refresh(this, config.maximumRefreshRate || 60)
+			if (config.useCustomWindowRefreshMethod)
+				win10refresh(this, config.maximumRefreshRate || 60)
 
 			if (config.disableOnBlur) {
 				this.#winconfig.opacity = 0
@@ -124,22 +135,44 @@ export class BrowserWindow extends electron.BrowserWindow {
 					if (isWindows10 && this.#winconfig) {
 						this.#winconfig.targetOpacity = 255
 						if (!this.#winconfig.opacityInterval)
-							this.#winconfig.opacityInterval = setInterval(() => {
-								try {
-									let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
-									if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
-										this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-										if (this.#winconfig.opacityInterval)
-											clearInterval(this.#winconfig.opacityInterval)
-										this.#winconfig.opacityInterval = undefined
-									} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
-									else this.#winconfig.currentOpacity += colorDiff
-									this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
-									_setVibrancy(this, this.#winconfig.vibrnacyConfig)
-								} catch (e) {
-
-								}
-							}, 1000 / 30)
+							this.#winconfig.opacityInterval = setInterval(
+								() => {
+									try {
+										let colorDiff =
+											(255 -
+												this.#winconfig.vibrnacyConfig
+													.colors.a) /
+											3.5
+										if (
+											Math.abs(
+												this.#winconfig.currentOpacity -
+													this.#winconfig
+														.targetOpacity
+											) < colorDiff
+										) {
+											this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
+											if (this.#winconfig.opacityInterval)
+												clearInterval(
+													this.#winconfig
+														.opacityInterval
+												)
+											this.#winconfig.opacityInterval = undefined
+										} else if (
+											this.#winconfig.currentOpacity >
+											this.#winconfig.targetOpacity
+										)
+											this.#winconfig.currentOpacity -= colorDiff
+										else
+											this.#winconfig.currentOpacity += colorDiff
+										this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
+										_setVibrancy(
+											this,
+											this.#winconfig.vibrnacyConfig
+										)
+									} catch (e) {}
+								},
+								1000 / 30
+							)
 					}
 				})
 
@@ -147,22 +180,44 @@ export class BrowserWindow extends electron.BrowserWindow {
 					if (isWindows10 && this.#winconfig) {
 						this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
 						if (!this.#winconfig.opacityInterval)
-							this.#winconfig.opacityInterval = setInterval(() => {
-								try {
-									let colorDiff = (255 - this.#winconfig.vibrnacyConfig.colors.a) / 3.5
-									if (Math.abs(this.#winconfig.currentOpacity - this.#winconfig.targetOpacity) < colorDiff) {
-										this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
-										if (this.#winconfig.opacityInterval)
-											clearInterval(this.#winconfig.opacityInterval)
-										this.#winconfig.opacityInterval = undefined
-									} else if (this.#winconfig.currentOpacity > this.#winconfig.targetOpacity) this.#winconfig.currentOpacity -= colorDiff
-									else this.#winconfig.currentOpacity += colorDiff
-									this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
-									_setVibrancy(this, this.#winconfig.vibrnacyConfig)
-								} catch (e) {
-
-								}
-							}, 1000 / 30)
+							this.#winconfig.opacityInterval = setInterval(
+								() => {
+									try {
+										let colorDiff =
+											(255 -
+												this.#winconfig.vibrnacyConfig
+													.colors.a) /
+											3.5
+										if (
+											Math.abs(
+												this.#winconfig.currentOpacity -
+													this.#winconfig
+														.targetOpacity
+											) < colorDiff
+										) {
+											this.#winconfig.currentOpacity = this.#winconfig.targetOpacity
+											if (this.#winconfig.opacityInterval)
+												clearInterval(
+													this.#winconfig
+														.opacityInterval
+												)
+											this.#winconfig.opacityInterval = undefined
+										} else if (
+											this.#winconfig.currentOpacity >
+											this.#winconfig.targetOpacity
+										)
+											this.#winconfig.currentOpacity -= colorDiff
+										else
+											this.#winconfig.currentOpacity += colorDiff
+										this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.currentOpacity
+										_setVibrancy(
+											this,
+											this.#winconfig.vibrnacyConfig
+										)
+									} catch (e) {}
+								},
+								1000 / 30
+							)
 					}
 				})
 			}
@@ -170,11 +225,11 @@ export class BrowserWindow extends electron.BrowserWindow {
 	}
 
 	get __electron_acrylic_window__(): WindowConfig {
-		return this.#winconfig;
+		return this.#winconfig
 	}
 
 	set __electron_acrylic_window__(v: WindowConfig) {
-		this.#winconfig = v;
+		this.#winconfig = v
 	}
 
 	/**
@@ -186,16 +241,16 @@ export class BrowserWindow extends electron.BrowserWindow {
 	// @ts-ignore
 	setVibrancy(options?: Vibrancy) {
 		if (options) {
-			this.#winconfig.vibrnacyConfig = getConfigFromOptions(options);
+			this.#winconfig.vibrnacyConfig = getConfigFromOptions(options)
 			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.vibrnacyConfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a
-			_setVibrancy(this, this.#winconfig.vibrnacyConfig);
+			_setVibrancy(this, this.#winconfig.vibrnacyConfig)
 		} else {
 			// If disabling vibrancy, turn off then save
 			_setVibrancy(this)
-			this.#winconfig.vibrnacyConfig = getConfigFromOptions(undefined);
+			this.#winconfig.vibrnacyConfig = getConfigFromOptions(undefined)
 			this.#winconfig.opacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.targetOpacity = this.#winconfig.vibrnacyConfig.colors.a
 			this.#winconfig.currentOpacity = this.#winconfig.vibrnacyConfig.colors.a

@@ -9,3 +9,7 @@ screenshots/
 .vscode/
 .editorconfig
 build/
+test/test.js
+test/test.js.map
+prettier.config.js
+.eslintrc.js

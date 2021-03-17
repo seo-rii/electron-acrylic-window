@@ -1,4 +1,4 @@
-import { BrowserWindow } from './browserWindow';
+import { BrowserWindow } from './browserWindow'
 /**
  * Unfortunately, we have to re-implement moving and resizing.
  * Enabling vibrancy slows down the window's event handling loop to the
@@ -21,4 +21,7 @@ import { BrowserWindow } from './browserWindow';
  * It handles multiple displays with varying vertical sync rates,
  * and changes to the display configuration while this process is running.
  */
-export default function win10refresh(win: BrowserWindow, maximumRefreshRate: number): void;
+export default function win10refresh(
+	win: BrowserWindow,
+	maximumRefreshRate: number
+): void
