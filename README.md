@@ -26,7 +26,7 @@ Huge thanks to all contributors!
 You will need Visual Studio or Visual C++ build tools to install this. An easy way to install them can be found [here](https://www.npmjs.com/package/windows-build-tools).
 
 ```shell script
-npm i electron-acrylic-window --save
+yarn add electron-acrylic-window
 ```
 
 ## Usage
@@ -134,6 +134,6 @@ To run the demo Electron application, clone this repository, install the depende
 ```bash
 git clone https://github.com/Seo-Rii/electron-acrylic-window.git
 cd electron-acrylic-window
-npm install
-npm test
+yarn install
+yarn run test
 ```
