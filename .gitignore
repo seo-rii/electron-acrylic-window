@@ -2,15 +2,7 @@
 build/
 node_modules/
 .git/
-.gitignore
-.travis.yml
-logo.png
-screenshots/
 .vscode/
-.editorconfig
-build/
 test/test.js
 test/test.js.map
-prettier.config.js
-.eslintrc.js
 .eslintcache

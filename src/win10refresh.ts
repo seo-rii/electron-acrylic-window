@@ -5,7 +5,9 @@ import process from 'process'
 import debug from './debug'
 
 function sleep(duration: number) {
-	return new Promise((resolve) => setTimeout(resolve, duration))
+	return new Promise<void>((resolve: () => void) =>
+		setTimeout(resolve, duration)
+	)
 }
 
 function areBoundsEqual(
@@ -262,7 +264,7 @@ export default function win10refresh(
 			}
 
 			// Poll at 600hz while moving window
-			const moveInterval = setInterval(
+			const moveInterval: NodeJS.Timer = setInterval(
 				() => handleIntervalTick(moveInterval),
 				1000 / 600
 			)

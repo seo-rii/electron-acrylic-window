@@ -246,17 +246,15 @@ export function setVibrancy(
 		win.__electron_acrylic_window__ || ({} as WindowConfig)
 
 	if (vibrancy) {
-		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(
-			vibrancy
-		)
+		win.__electron_acrylic_window__.vibrnacyConfig =
+			getConfigFromOptions(vibrancy)
 
 		_setVibrancy(win, win.__electron_acrylic_window__.vibrnacyConfig)
 	} else {
 		// If disabling vibrancy, turn off then save
 		_setVibrancy(win)
 
-		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(
-			undefined
-		)
+		win.__electron_acrylic_window__.vibrnacyConfig =
+			getConfigFromOptions(undefined)
 	}
 }

@@ -48,7 +48,13 @@ var __importDefault =
 		return mod && mod.__esModule ? mod : { default: mod }
 	}
 Object.defineProperty(exports, '__esModule', { value: true })
-exports.setVibrancy = exports._setVibrancy = exports.getConfigFromOptions = exports.rgbToHex = exports._8bitToHex = exports.hexTo255 = void 0
+exports.setVibrancy =
+	exports._setVibrancy =
+	exports.getConfigFromOptions =
+	exports.rgbToHex =
+	exports._8bitToHex =
+	exports.hexTo255 =
+		void 0
 const bindings_1 = __importDefault(require('./bindings'))
 const debug_1 = __importDefault(require('./debug'))
 const os_1 = require('./os')
@@ -195,16 +201,14 @@ function setVibrancy(win, vibrancy = 'appearance-based') {
 	// only .vibrnacyConfig is used
 	win.__electron_acrylic_window__ = win.__electron_acrylic_window__ || {}
 	if (vibrancy) {
-		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(
-			vibrancy
-		)
+		win.__electron_acrylic_window__.vibrnacyConfig =
+			getConfigFromOptions(vibrancy)
 		_setVibrancy(win, win.__electron_acrylic_window__.vibrnacyConfig)
 	} else {
 		// If disabling vibrancy, turn off then save
 		_setVibrancy(win)
-		win.__electron_acrylic_window__.vibrnacyConfig = getConfigFromOptions(
-			undefined
-		)
+		win.__electron_acrylic_window__.vibrnacyConfig =
+			getConfigFromOptions(undefined)
 	}
 }
 exports.setVibrancy = setVibrancy

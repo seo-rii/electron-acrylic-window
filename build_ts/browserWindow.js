@@ -44,31 +44,54 @@ var __importStar =
 	}
 var __classPrivateFieldGet =
 	(this && this.__classPrivateFieldGet) ||
-	function (receiver, privateMap) {
-		if (!privateMap.has(receiver)) {
+	function (receiver, state, kind, f) {
+		if (kind === 'a' && !f)
+			throw new TypeError('Private accessor was defined without a getter')
+		if (
+			typeof state === 'function'
+				? receiver !== state || !f
+				: !state.has(receiver)
+		)
 			throw new TypeError(
-				'attempted to get private field on non-instance'
+				'Cannot read private member from an object whose class did not declare it'
 			)
-		}
-		return privateMap.get(receiver)
+		return kind === 'm'
+			? f
+			: kind === 'a'
+			? f.call(receiver)
+			: f
+			? f.value
+			: state.get(receiver)
 	}
 var __classPrivateFieldSet =
 	(this && this.__classPrivateFieldSet) ||
-	function (receiver, privateMap, value) {
-		if (!privateMap.has(receiver)) {
+	function (receiver, state, value, kind, f) {
+		if (kind === 'm') throw new TypeError('Private method is not writable')
+		if (kind === 'a' && !f)
+			throw new TypeError('Private accessor was defined without a setter')
+		if (
+			typeof state === 'function'
+				? receiver !== state || !f
+				: !state.has(receiver)
+		)
 			throw new TypeError(
-				'attempted to set private field on non-instance'
+				'Cannot write private member to an object whose class did not declare it'
 			)
-		}
-		privateMap.set(receiver, value)
-		return value
+		return (
+			kind === 'a'
+				? f.call(receiver, value)
+				: f
+				? (f.value = value)
+				: state.set(receiver, value),
+			value
+		)
 	}
 var __importDefault =
 	(this && this.__importDefault) ||
 	function (mod) {
 		return mod && mod.__esModule ? mod : { default: mod }
 	}
-var _vibconfig, _winconfig
+var _BrowserWindow_vibconfig, _BrowserWindow_winconfig
 Object.defineProperty(exports, '__esModule', { value: true })
 exports.BrowserWindow = void 0
 const electron = __importStar(require('electron'))
@@ -90,7 +113,7 @@ class BrowserWindow extends electron.BrowserWindow {
 			})
 		)
 		this.options = options
-		_vibconfig.set(
+		_BrowserWindow_vibconfig.set(
 			this,
 			vibrancy_1.getConfigFromOptions(
 				(_a = this.options) === null || _a === void 0
@@ -98,10 +121,14 @@ class BrowserWindow extends electron.BrowserWindow {
 					: _a.vibrancy
 			)
 		)
-		_winconfig.set(this, {
+		_BrowserWindow_winconfig.set(this, {
 			targetOpacity: 0,
 			vibrancyActivated: false,
-			vibrnacyConfig: __classPrivateFieldGet(this, _vibconfig),
+			vibrnacyConfig: __classPrivateFieldGet(
+				this,
+				_BrowserWindow_vibconfig,
+				'f'
+			),
 			opacity: 0,
 			currentOpacity: 0,
 			opacityInterval: undefined,
@@ -124,38 +151,50 @@ class BrowserWindow extends electron.BrowserWindow {
 				this.setBackgroundColor(vibrancy_1.rgbToHex(config.colors.base))
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).opacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).targetOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			this.webContents.on('devtools-closed', () => {
 				vibrancy_1._setVibrancy(this)
 				setTimeout(() => {
 					vibrancy_1._setVibrancy(
 						this,
-						__classPrivateFieldGet(this, _winconfig).vibrnacyConfig
+						__classPrivateFieldGet(
+							this,
+							_BrowserWindow_winconfig,
+							'f'
+						).vibrnacyConfig
 					)
 				}, 100)
 			})
@@ -164,104 +203,146 @@ class BrowserWindow extends electron.BrowserWindow {
 					if (opShowOriginal) this.show()
 					vibrancy_1._setVibrancy(
 						this,
-						__classPrivateFieldGet(this, _winconfig).vibrnacyConfig
+						__classPrivateFieldGet(
+							this,
+							_BrowserWindow_winconfig,
+							'f'
+						).vibrnacyConfig
 					)
 				}, 100)
 			})
-			if (__classPrivateFieldGet(this, _winconfig).debug)
+			if (
+				__classPrivateFieldGet(this, _BrowserWindow_winconfig, 'f')
+					.debug
+			)
 				debug_1.toggleDebugging(
-					__classPrivateFieldGet(this, _winconfig).debug
+					__classPrivateFieldGet(this, _BrowserWindow_winconfig, 'f')
+						.debug
 				)
 			if (config.useCustomWindowRefreshMethod)
 				win10refresh_1.default(this, config.maximumRefreshRate || 60)
 			if (config.disableOnBlur) {
-				__classPrivateFieldGet(this, _winconfig).opacity = 0
+				__classPrivateFieldGet(
+					this,
+					_BrowserWindow_winconfig,
+					'f'
+				).opacity = 0
 				this.on('blur', () => {
 					if (
 						os_1.isWindows10 &&
-						__classPrivateFieldGet(this, _winconfig)
+						__classPrivateFieldGet(
+							this,
+							_BrowserWindow_winconfig,
+							'f'
+						)
 					) {
 						__classPrivateFieldGet(
 							this,
-							_winconfig
+							_BrowserWindow_winconfig,
+							'f'
 						).targetOpacity = 255
 						if (
-							!__classPrivateFieldGet(this, _winconfig)
-								.opacityInterval
+							!__classPrivateFieldGet(
+								this,
+								_BrowserWindow_winconfig,
+								'f'
+							).opacityInterval
 						)
 							__classPrivateFieldGet(
 								this,
-								_winconfig
+								_BrowserWindow_winconfig,
+								'f'
 							).opacityInterval = setInterval(() => {
 								try {
 									let colorDiff =
 										(255 -
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).vibrnacyConfig.colors.a) /
 										3.5
 									if (
 										Math.abs(
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).currentOpacity -
 												__classPrivateFieldGet(
 													this,
-													_winconfig
+													_BrowserWindow_winconfig,
+													'f'
 												).targetOpacity
 										) < colorDiff
 									) {
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity = __classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).targetOpacity
 										if (
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).opacityInterval
 										)
 											clearInterval(
 												__classPrivateFieldGet(
 													this,
-													_winconfig
+													_BrowserWindow_winconfig,
+													'f'
 												).opacityInterval
 											)
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).opacityInterval = undefined
 									} else if (
-										__classPrivateFieldGet(this, _winconfig)
-											.currentOpacity >
-										__classPrivateFieldGet(this, _winconfig)
-											.targetOpacity
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).currentOpacity >
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).targetOpacity
 									)
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity -= colorDiff
 									else
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity += colorDiff
 									__classPrivateFieldGet(
 										this,
-										_winconfig
+										_BrowserWindow_winconfig,
+										'f'
 									).vibrnacyConfig.currentOpacity = __classPrivateFieldGet(
 										this,
-										_winconfig
+										_BrowserWindow_winconfig,
+										'f'
 									).currentOpacity
 									vibrancy_1._setVibrancy(
 										this,
-										__classPrivateFieldGet(this, _winconfig)
-											.vibrnacyConfig
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).vibrnacyConfig
 									)
 								} catch (e) {}
 							}, 1000 / 30)
@@ -270,92 +351,123 @@ class BrowserWindow extends electron.BrowserWindow {
 				this.on('focus', () => {
 					if (
 						os_1.isWindows10 &&
-						__classPrivateFieldGet(this, _winconfig)
+						__classPrivateFieldGet(
+							this,
+							_BrowserWindow_winconfig,
+							'f'
+						)
 					) {
 						__classPrivateFieldGet(
 							this,
-							_winconfig
+							_BrowserWindow_winconfig,
+							'f'
 						).targetOpacity = __classPrivateFieldGet(
 							this,
-							_winconfig
+							_BrowserWindow_winconfig,
+							'f'
 						).vibrnacyConfig.colors.a
 						if (
-							!__classPrivateFieldGet(this, _winconfig)
-								.opacityInterval
+							!__classPrivateFieldGet(
+								this,
+								_BrowserWindow_winconfig,
+								'f'
+							).opacityInterval
 						)
 							__classPrivateFieldGet(
 								this,
-								_winconfig
+								_BrowserWindow_winconfig,
+								'f'
 							).opacityInterval = setInterval(() => {
 								try {
 									let colorDiff =
 										(255 -
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).vibrnacyConfig.colors.a) /
 										3.5
 									if (
 										Math.abs(
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).currentOpacity -
 												__classPrivateFieldGet(
 													this,
-													_winconfig
+													_BrowserWindow_winconfig,
+													'f'
 												).targetOpacity
 										) < colorDiff
 									) {
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity = __classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).targetOpacity
 										if (
 											__classPrivateFieldGet(
 												this,
-												_winconfig
+												_BrowserWindow_winconfig,
+												'f'
 											).opacityInterval
 										)
 											clearInterval(
 												__classPrivateFieldGet(
 													this,
-													_winconfig
+													_BrowserWindow_winconfig,
+													'f'
 												).opacityInterval
 											)
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).opacityInterval = undefined
 									} else if (
-										__classPrivateFieldGet(this, _winconfig)
-											.currentOpacity >
-										__classPrivateFieldGet(this, _winconfig)
-											.targetOpacity
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).currentOpacity >
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).targetOpacity
 									)
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity -= colorDiff
 									else
 										__classPrivateFieldGet(
 											this,
-											_winconfig
+											_BrowserWindow_winconfig,
+											'f'
 										).currentOpacity += colorDiff
 									__classPrivateFieldGet(
 										this,
-										_winconfig
+										_BrowserWindow_winconfig,
+										'f'
 									).vibrnacyConfig.currentOpacity = __classPrivateFieldGet(
 										this,
-										_winconfig
+										_BrowserWindow_winconfig,
+										'f'
 									).currentOpacity
 									vibrancy_1._setVibrancy(
 										this,
-										__classPrivateFieldGet(this, _winconfig)
-											.vibrnacyConfig
+										__classPrivateFieldGet(
+											this,
+											_BrowserWindow_winconfig,
+											'f'
+										).vibrnacyConfig
 									)
 								} catch (e) {}
 							}, 1000 / 30)
@@ -365,10 +477,10 @@ class BrowserWindow extends electron.BrowserWindow {
 		}
 	}
 	get __electron_acrylic_window__() {
-		return __classPrivateFieldGet(this, _winconfig)
+		return __classPrivateFieldGet(this, _BrowserWindow_winconfig, 'f')
 	}
 	set __electron_acrylic_window__(v) {
-		__classPrivateFieldSet(this, _winconfig, v)
+		__classPrivateFieldSet(this, _BrowserWindow_winconfig, v, 'f')
 	}
 	/**
 	 * Set the vibrancy for the specified window.
@@ -381,78 +493,98 @@ class BrowserWindow extends electron.BrowserWindow {
 		if (options) {
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig = vibrancy_1.getConfigFromOptions(options)
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).opacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).targetOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			vibrancy_1._setVibrancy(
 				this,
-				__classPrivateFieldGet(this, _winconfig).vibrnacyConfig
+				__classPrivateFieldGet(this, _BrowserWindow_winconfig, 'f')
+					.vibrnacyConfig
 			)
 		} else {
 			// If disabling vibrancy, turn off then save
 			vibrancy_1._setVibrancy(this)
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig = vibrancy_1.getConfigFromOptions(undefined)
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).opacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).targetOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 			__classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.currentOpacity = __classPrivateFieldGet(
 				this,
-				_winconfig
+				_BrowserWindow_winconfig,
+				'f'
 			).vibrnacyConfig.colors.a
 		}
 	}
 }
 exports.BrowserWindow = BrowserWindow
-;(_vibconfig = new WeakMap()), (_winconfig = new WeakMap())
+;(_BrowserWindow_vibconfig = new WeakMap()),
+	(_BrowserWindow_winconfig = new WeakMap())
 //# sourceMappingURL=browserWindow.js.map

@@ -5,7 +5,7 @@
 		"lib": ["ES2015"],
 		"sourceMap": true,
 		"strict": true,
-		"rootDir": "src",
+		"rootDir": "./",
 		"skipLibCheck": true
 	}
 }
