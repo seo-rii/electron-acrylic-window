@@ -23,7 +23,7 @@
 	"repository": "https://github.com/Seo-Rii/electron-acrylic-window",
 	"license": "MIT",
 	"author": "seorii <studioSeoRii@gmail.com>",
-	"main": "build_ts/index.js",
+	"main": "dist/index.js",
 	"scripts": {
 		"build": "(node-gyp rebuild && npm run-script build-ts)",
 		"build-ts": "npx tsc",

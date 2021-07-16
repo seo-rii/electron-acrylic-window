@@ -1,5 +1,5 @@
-import { BrowserWindow, Vibrancy } from '../build_ts'
-import { toggleDebugging as debug } from '../build_ts/debug'
+import { BrowserWindow, Vibrancy } from '../dist'
+import { toggleDebugging as debug } from '../dist/debug'
 import { app } from 'electron'
 import * as os from 'os'
 import * as path from 'path'
