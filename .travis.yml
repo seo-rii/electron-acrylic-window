@@ -12,5 +12,7 @@ branches:
     - master
 
 install:
-  - npm install electron -g
-  - npm install
+  - npm install yarn electron webpack typescript -g
+
+script:
+  - yarn install
