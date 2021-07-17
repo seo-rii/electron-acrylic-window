@@ -2,7 +2,6 @@
 	"name": "electron-acrylic-window",
 	"version": "0.5.6",
 	"description": "Add vibrancy effect for electron",
-	"main": "build_ts/index.js",
 	"keywords": [
 		"node",
 		"vibrancy",
@@ -16,11 +15,19 @@
 		"fluent",
 		"electron"
 	],
+	"homepage": "https://github.com/Seo-Rii/electron-acrylic-window#readme",
+	"bugs": {
+		"url": "https://github.com/Seo-Rii/electron-acrylic-window/issues",
+		"email": "studioSeoRii@gmail.com"
+	},
+	"repository": "https://github.com/Seo-Rii/electron-acrylic-window",
+	"license": "MIT",
+	"author": "seorii <studioSeoRii@gmail.com>",
+	"main": "dist/index.js",
 	"scripts": {
-		"build": "(node-gyp rebuild && npm run-script build-ts)",
-		"build-ts": "npx tsc",
+		"build": "node-gyp rebuild && tsc",
 		"install": "node-gyp rebuild",
-		"test": "npx tsc -p test && electron test/test.js",
+		"test": "yarn build && yarn --cwd examples/customizable start",
 		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
 		"lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
 		"release": "standard-version"
@@ -31,30 +38,15 @@
 			"commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
 		}
 	},
-	"lint-staged": {
-		"*.{js,jsx,ts,tsx}": "eslint --cache --fix",
-		"*.{js,jsx,ts,tsx,json,md}": "prettier --write"
-	},
 	"commitlint": {
 		"extends": [
 			"@commitlint/config-conventional"
 		]
 	},
-	"engines": {
-		"node": ">=8.0.0"
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+		"*.{js,jsx,ts,tsx,json,md}": "prettier --write"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/Seo-Rii/electron-acrylic-window.git"
-	},
-	"author": "seorii <studioSeoRii@gmail.com>",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/Seo-Rii/electron-acrylic-window/issues",
-		"email": "studioSeoRii@gmail.com"
-	},
-	"homepage": "https://github.com/Seo-Rii/electron-acrylic-window#readme",
-	"gypfile": true,
 	"dependencies": {
 		"bindings": "^1.5.0",
 		"node-addon-api": "^4.0.0",
@@ -81,15 +73,8 @@
 		"typescript": "^4.3.5",
 		"yarn": "^1.22.10"
 	},
-	"files": [
-		"/LICENSE",
-		"/README.md",
-		"/tsconfig.json",
-		"/package.json",
-		"/logo.png",
-		"/index.d.ts",
-		"/binding.gyp",
-		"src/**/*",
-		"build_ts/**/*"
-	]
+	"engines": {
+		"node": ">=8.0.0"
+	},
+	"gypfile": true
 }

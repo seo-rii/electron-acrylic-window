@@ -1,0 +1,9 @@
+{
+	"name": "simple",
+	"description": "Simple example demonstrating simple a use case",
+	"version": "1.0.0",
+	"main": "src/main.js",
+	"scripts": {
+		"start": "npx electron ."
+	}
+}

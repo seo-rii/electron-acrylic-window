@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Customizable - Electron Acrylic Window Example</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="stylesheet" href="style.css">
+<script src="main.js" type="module" defer></script>
+
+<!-- FONTS -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap" rel="stylesheet">
+
+<div class="titlebar">
+	<div id="drag-region" class="titlebar--drag-region">
+		<div class="titlebar--title">
+			<img src="favicon.ico" alt="" class="titlebar--title-icon">
+			<span class="titlebar--title-content">
+				Customizable - Electron Acrylic Window Example
+			</span>
+		</div>
+	</div>
+	<div class="titlebar--controls">
+		<div class="titlebar--control titlebar--control-minimize" id="minimize-control">
+			<span>&#xE921;</span>
+		</div>
+		<div class="titlebar--control titlebar--control-restore" id="restore-control" style="display: none;">
+			<span>&#xE923;</span>
+		</div>
+		<div class="titlebar--control titlebar--control-maximize" id="maximize-control">
+			<span>&#xE922;</span>
+		</div>
+		<div class="titlebar--control titlebar--control-close" id="close-control">
+			<span>&#xE8BB;</span>
+		</div>
+	</div>
+</div>
+
+<main>
+	<div class="content">
+		<h1 class="title">Electron Acrylic Window</h1>
+
+		<form class="update-form" id="update-form" action="/hello" onsubmit="event.preventDefault(); return false;">
+			<div class="update-form--section update-form--section-a">
+				<bx-checkbox name="customRefresh" id="custom-refresh" checked>
+					<bx-tooltip-definition body-text="Use custom window resize/move handler for performance">
+						Custom Window Refresh
+					</bx-tooltip-definition>
+				</bx-checkbox>
+			</div>
+
+			<div class="update-form--section update-form--section-b">
+				<bx-checkbox name="disableOnBlur" id="disable-on-blur" checked>
+					<bx-tooltip-definition body-text="Acrylic effect will be disabled when the window loses focus">
+						Disable On Blur
+					</bx-tooltip-definition>
+				</bx-checkbox>
+			</div>
+
+			<div class="update-form--section update-form--section-c">
+				<bx-dropdown name="effect" id="effect" size="xl" trigger-content="Effect (Acrylic)" value="acrylic">
+					<bx-dropdown-item value="acrylic">
+						Acrylic
+					</bx-dropdown-item>
+					<bx-dropdown-item value="blur">
+						Blur
+					</bx-dropdown-item>
+				</bx-dropdown>
+			</div>
+
+			<div class="update-form--section update-form--section-d bx-input-fixed">
+				<bx-input name="color" id="color" value="#12345678"></bx-input>
+			</div>
+
+			<div class="update-form--section update-form--section-e">
+				<bx-dropdown name="appTheme" id="app-theme" size="xl" trigger-content="App theme (Auto)" value="auto">
+					<bx-dropdown-item value="auto">
+						Auto
+					</bx-dropdown-item>
+					<bx-dropdown-item value="light">
+						Light
+					</bx-dropdown-item>
+					<bx-dropdown-item value="dark">
+						Dark
+					</bx-dropdown-item>
+				</bx-dropdown>
+			</div>
+
+			<div class="update-form--section update-form--section-f">
+				<bx-btn id="update" class="update-form--section-f-item"
+					onclick="this.parentElement.parentElement.dispatchEvent(new CustomEvent('submit'))" >
+					Update Window
+				</bx-btn>
+			</div>
+		</form>
+		<div class="footer">
+			<bx-link href="https://github.com/Seo-Rii/electron-acrylic-window/" target="_blank">GitHub</bx-link>
+			<bx-link href="javascript:void(0)" id="blur-link">Blur Window</bx-link>
+			<bx-link href="javascript:void(0)" id="devtools-link">DevTools</bx-link>
+		</div>
+	</div>
+</main>

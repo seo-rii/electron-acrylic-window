@@ -1,8 +1,7 @@
 .idea/
 build/
+dist/
 node_modules/
 .git/
 .vscode/
-test/test.js
-test/test.js.map
 .eslintcache
