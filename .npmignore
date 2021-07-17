@@ -3,7 +3,7 @@ build/
 node_modules/
 .git/
 .gitignore
-.travis.yml
+.github/
 logo.png
 screenshots/
 examples/
