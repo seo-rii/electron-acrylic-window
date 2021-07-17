@@ -85,7 +85,7 @@
 			</div>
 
 			<div class="update-form--section update-form--section-f">
-				<bx-btn id="update" class="update-form--section-f-item" disabled
+				<bx-btn id="update" class="update-form--section-f-item"
 					onclick="this.parentElement.parentElement.dispatchEvent(new CustomEvent('submit'))" >
 					Update Window
 				</bx-btn>
@@ -97,11 +97,4 @@
 			<bx-link href="javascript:void(0)" id="devtools-link">DevTools</bx-link>
 		</div>
 	</div>
-
-	<bx-inline-notification id="out-of-sync-notification" class="notification" style="display: none;">
-		Settings are likely to be out of sync.&nbsp;
-		<bx-link id="out-of-sync-action" size="lg">
-			Discard Changes
-		</bx-link>.
-	</bx-inline-notification>
 </main>
