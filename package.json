@@ -28,7 +28,7 @@
 		"build": "(node-gyp rebuild && npm run-script build-ts)",
 		"build-ts": "npx tsc",
 		"install": "node-gyp rebuild",
-		"test": "npx tsc -p test && electron test/test.js",
+		"test": "yarn build && yarn --cwd examples/customizable start",
 		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
 		"lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
 		"release": "standard-version"

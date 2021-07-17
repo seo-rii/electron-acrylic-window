@@ -1,0 +1,174 @@
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
+	--color: black;
+}
+
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
+	--color: white;
+}
+
+#drag-region {
+    -webkit-app-region: drag;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	display: grid;
+	grid: 30px 1fr / 100%;
+	grid-template-areas: "titlebar" "main";
+	border: 1px solid rgb(34, 34, 34);
+	overflow: hidden;
+}
+
+.titlebar {
+	grid-area: titlebar;
+	display: grid;
+	grid: 100% / minmax(0, 1fr) auto;
+	grid-template-areas: "drag-region controls";
+	color: var(--color);
+
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+		Roboto, Oxygen, Ubuntu, Cantarell,
+		'Open Sans', 'Helvetica Neue', sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.titlebar, .titlebar * {
+	user-select: none !important;
+}
+
+.titlebar .titlebar--drag-region {
+	grid-area: drag-region;
+}
+
+.titlebar .titlebar--title {
+	display: flex;
+	align-items: center;
+	height: 100%;
+	padding-left: 7px;
+    font-size: 12px;
+}
+
+.titlebar .titlebar--title-icon {
+	width: 18px;
+	height: 18px;
+	padding-right: 5px;
+}
+
+.titlebar .titlebar--title-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.titlebar .titlebar--controls {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+}
+
+.titlebar .titlebar--control {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	height: 29px;
+	width: 45px;
+	transition: background 165ms;
+    font-family: "Segoe MDL2 Assets", sans-serif;
+	text-rendering: geometricPrecision;
+	cursor: default;
+    font-size: 9.5px;
+}
+
+.titlebar .titlebar--control:hover {
+	background: rgba(0, 0, 0, .1);
+}
+
+.titlebar .titlebar--control:active {
+	background: rgba(0, 0, 0, .2);
+}
+
+.titlebar .titlebar--control-close:hover {
+	background: rgb(232, 17, 35, 1);
+}
+.titlebar .titlebar--control-close:active {
+	background: rgb(241, 112, 122);
+}
+
+.titlebar .titlebar--control-close:hover,
+.titlebar .titlebar--control-close:active {
+	color: white;
+}
+
+main {
+	grid-area: main;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: auto;
+	font-family: 'IBM Plex Sans', sans-serif;
+	color: black;
+}
+
+main .content {
+	position: relative;
+	text-align: center;
+	height: 16.875rem;
+	padding: 2rem;
+	background: #fff2;
+}
+
+.content .footer {
+	position: absolute;
+	bottom: 0;
+	padding-bottom: .5rem;
+	left: 0;
+	width: 100%;
+	display: grid;
+	grid: 100% / repeat(3, 1fr);
+}
+
+.bx-input-fixed {
+	transform: translate(0, -.5rem);
+}
+
+bx-link {
+	cursor: pointer;
+	font-size: inherit;
+}
+
+bx-inline-notification {
+	margin: 1rem;
+}
+
+.notification {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+}
+
+.update-form {
+	display: grid;
+	margin: 0 auto;
+	width: 30rem;
+	grid: repeat(3, 48px) / repeat(2, 50%);
+	grid-template-areas: "a b" "c d" "e f";
+}
+
+.update-form .update-form--section-a,
+.update-form .update-form--section-b {
+	margin: auto;
+}
+
+.update-form .update-form--section-f {
+	grid-area: f;
+}
+
+.update-form .update-form--section-f-item {
+	width: 100%;
+}
