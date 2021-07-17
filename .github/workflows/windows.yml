@@ -37,5 +37,4 @@ jobs:
       run: npm install yarn electron webpack typescript -g
 
     - name: Test
-      run: yarn intall
-
+      run: yarn install
