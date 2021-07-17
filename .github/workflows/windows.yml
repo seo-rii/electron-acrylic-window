@@ -1,4 +1,4 @@
-name: Node.js CI
+name: CI
 
 on:
   push:
@@ -36,5 +36,11 @@ jobs:
     - name: Install Global Dependencies
       run: npm install yarn electron webpack typescript -g
 
-    - name: Test
+    - name: Install Dependencies & Build Native Files
       run: yarn install
+
+    - name: Build Typescript files
+      run: yarn run build
+
+    - name: Run ESLint
+      run: yarn run lint
