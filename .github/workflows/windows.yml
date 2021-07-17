@@ -32,7 +32,7 @@ jobs:
       run: |
         npm install --global node-gyp@latest
         npm prefix -g | % {npm config set node_gyp "$_\node_modules\node-gyp\bin\node-gyp.js"}
-        
+
     - name: Install Global Dependencies
       run: npm install yarn electron webpack typescript -g
 
