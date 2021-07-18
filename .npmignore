@@ -9,3 +9,5 @@ screenshots/
 examples/
 .vscode/
 .editorconfig
+.eslintrc.js
+prettier.config.js
