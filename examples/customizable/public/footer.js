@@ -4,7 +4,7 @@ const blurLink = document.getElementById('blur-link'),
 devtoolsLink.addEventListener('click', () => {
 	window.browser.webContents.openDevTools({
 		mode: 'detach',
-		activate: true
+		activate: true,
 	})
 })
 

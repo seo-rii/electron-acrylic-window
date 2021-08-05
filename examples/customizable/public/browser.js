@@ -1,3 +1,2 @@
-const electron = require('electron').remote
-const browser = electron.getCurrentWindow()
+const browser = require('electron').remote.getCurrentWindow()
 window.browser = browser

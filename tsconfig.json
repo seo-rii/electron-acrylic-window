@@ -11,7 +11,5 @@
 		"esModuleInterop": true,
 		"outDir": "dist"
 	},
-	"include": [
-		"src"
-	]
+	"include": ["src"]
 }

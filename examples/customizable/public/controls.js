@@ -3,7 +3,6 @@ const closeControlEl = document.getElementById('close-control'),
 	restoreControlEl = document.getElementById('restore-control'),
 	minimizeControlEl = document.getElementById('minimize-control')
 
-
 function updateWindowMaximizeState() {
 	if (window.browser.isMaximized()) {
 		document.body.classList.add('maximized')
@@ -11,7 +10,6 @@ function updateWindowMaximizeState() {
 		document.body.classList.remove('maximized')
 	}
 }
-
 
 window.browser.on('maximize', updateWindowMaximizeState)
 window.browser.on('unmaximize', updateWindowMaximizeState)

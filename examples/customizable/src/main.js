@@ -6,7 +6,10 @@ const path = require('path')
 
 function isVibrancySupported() {
 	// Windows 10 or greater
-	return process.platform === 'win32' && parseInt(os.release().split('.')[0]) >= 10
+	return (
+		process.platform === 'win32' &&
+		parseInt(os.release().split('.')[0]) >= 10
+	)
 }
 
 let window
@@ -47,7 +50,7 @@ function createWindow() {
 	window.webContents.setWindowOpenHandler((details) => {
 		shell.openExternal(details.url)
 		return { action: 'deny' }
-	});
+	})
 
 	window.show()
 }
