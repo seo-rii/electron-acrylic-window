@@ -42,6 +42,8 @@ function createWindow() {
 		},
 		vibrancy: vibrancy,
 	})
+	require('@electron/remote/main').initialize()
+	require('@electron/remote/main').enable(window.webContents)
 
 	window.loadFile(path.resolve('public/index.html'))
 	window.webContents.openDevTools({ mode: 'detach' })
@@ -55,7 +57,11 @@ function createWindow() {
 	window.show()
 }
 
-app.on('ready', createWindow)
+function init() {
+	createWindow()
+}
+
+app.on('ready', init)
 
 app.on('window-all-closed', () => {
 	if (process.platform !== 'darwin') app.quit()
