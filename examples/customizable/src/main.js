@@ -13,6 +13,7 @@ function isVibrancySupported() {
 }
 
 let window
+
 function createWindow() {
 	// activate debugging
 	debug(true)
@@ -23,7 +24,7 @@ function createWindow() {
 		vibrancy = {
 			theme: '#12345678',
 			effect: 'acrylic',
-			useCustomWindowRefreshMethod: true,
+			useCustomWindowRefreshMethod: false,
 			disableOnBlur: true,
 			debug: false,
 		}
@@ -41,6 +42,7 @@ function createWindow() {
 			contextIsolation: false,
 		},
 		vibrancy: vibrancy,
+		transparent: true,
 	})
 	require('@electron/remote/main').initialize()
 	require('@electron/remote/main').enable(window.webContents)

@@ -15,6 +15,14 @@ enum WindowCompositionAttribute {
     WCA_ACCENT_POLICY = 19
 };
 
+const int DWMWA_MICA_EFFECT = 1029;
+
+enum DWM_MICA_PREFERENCE
+{
+    DWMWCP_FALSE = 0,
+    DWMWCP_TRUE = 1
+};
+
 struct AccentPolicy {
     AccentState accentState;
     int accentFlags;
@@ -55,6 +63,10 @@ void setVibrancy(const Napi::CallbackInfo &info) {
         int greenValue = info[3].As<Napi::Number>().Int32Value();
         int blueValue = info[4].As<Napi::Number>().Int32Value();
         int alphaValue = info[5].As<Napi::Number>().Int32Value();
+
+        DWM_MICA_PREFERENCE preference = DWMWCP_TRUE;
+        DwmSetWindowAttribute(hWnd, DWMWA_MICA_EFFECT, &preference, sizeof(preference));
+        return;
 
         if (hModule) {
             const pSetWindowCompositionAttribute SetWindowCompositionAttribute = (pSetWindowCompositionAttribute) GetProcAddress(

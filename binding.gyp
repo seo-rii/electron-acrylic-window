@@ -17,6 +17,9 @@
       ],
       "defines": [
         "NAPI_DISABLE_CPP_EXCEPTIONS"
+      ],
+      "libraries": [
+      	"dwmapi.lib"
       ]
     }
   ]
