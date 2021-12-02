@@ -11,5 +11,5 @@ export const isRS4OrGreater =
 	isWindows10 &&
 	!(
 		os.release().split('.')[1] === '0' &&
-		parseInt(os.release().split('.')[2]) < 17134
+		parseInt(os.release().split('.')[2], 10) < 17134
 	)
