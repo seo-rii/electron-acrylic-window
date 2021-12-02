@@ -6,7 +6,7 @@ import {
 	Vibrancy,
 	VibrancyConfig,
 } from './vibrancy'
-import { isWindows10 } from './os'
+import { isWindows10, isWindows11 } from './os'
 import win10refresh from './win10refresh'
 import { toggleDebugging } from './debug'
 
@@ -128,7 +128,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 			if (this.#winconfig.debug) toggleDebugging(this.#winconfig.debug)
 
-			if (config.useCustomWindowRefreshMethod)
+			if (config.useCustomWindowRefreshMethod && !isWindows11)
 				win10refresh(this, config.maximumRefreshRate || 60)
 
 			if (config.disableOnBlur) {

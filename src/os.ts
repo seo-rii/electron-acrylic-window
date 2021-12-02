@@ -3,6 +3,10 @@ import * as os from 'os'
 export const isWindows10 =
 	process.platform === 'win32' && os.release().split('.')[0] === '10'
 
+export const isWindows11 =
+	process.platform === 'win32' &&
+	parseInt(os.release().split('.')[2]) >= 22000
+
 export const isRS4OrGreater =
 	isWindows10 &&
 	!(
