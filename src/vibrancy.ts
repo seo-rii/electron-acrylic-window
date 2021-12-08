@@ -187,7 +187,7 @@ export function getConfigFromOptions(
 export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
 	if (config && config.colors) {
 		debug('Vibrancy On', config)
-		bindings.setVibrancy(
+		bindings().setVibrancy(
 			getHwnd(win),
 			config.effect,
 			config.colors.r,
@@ -226,7 +226,7 @@ export function _setVibrancy(win: BrowserWindow, config?: VibrancyConfig) {
 		setTimeout(() => {
 			try {
 				if (!win.__electron_acrylic_window__.vibrancyActivated)
-					bindings.disableVibrancy(getHwnd(win))
+					bindings().disableVibrancy(getHwnd(win))
 			} catch (e) {}
 		}, 10)
 	}

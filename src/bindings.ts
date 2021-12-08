@@ -10,6 +10,7 @@ export interface Bindings {
 	disableVibrancy(hwnd: number): void
 }
 
-const wrapper: Bindings = require('bindings')('vibrancy-wrapper')
-
-export default wrapper
+let _bindings: Bindings | undefined
+export default function bindings(): Bindings {
+	return (_bindings ??= require('bindings')('vibrancy-wrapper'))
+}
