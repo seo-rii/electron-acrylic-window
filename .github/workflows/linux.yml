@@ -1,0 +1,36 @@
+name: CI-linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js 16.x
+      uses: actions/setup-node@v2
+      with:
+        node-version: 16.x
+        cache: 'npm'
+
+    - name: Update npm
+      run: npm install --global npm@latest
+
+    - name: Install Global Dependencies
+      run: npm install yarn electron webpack typescript -g
+
+    - name: Install Dependencies & Build Native Files
+      run: yarn install
+
+    - name: Build Typescript files
+      run: yarn run build
+
+    - name: Run ESLint
+      run: yarn run lint
