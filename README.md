@@ -3,7 +3,7 @@
 <h1 align="center">electron-acrylic-window</h1>
 
 [![Build Status](https://github.com/Seo-Rii/electron-acrylic-window/actions/workflows/.github/workflows/windows.yml/badge.svg)](https://github.com/Seo-Rii/electron-acrylic-window/actions/workflows/windows.yml)
-[![Dependencies](https://david-dm.org/seo-rii/electron-acrylic-window.svg)](https://david-dm.org/seo-rii/electron-acrylic-window)
+![Libraries.io dependency status for latest release](https://img.shields.io/librariesio/release/npm/electron-acrylic-window)
 [![npm version](https://badge.fury.io/js/electron-acrylic-window.svg)](https://badge.fury.io/js/electron-acrylic-window)
 
 Makes it simple to add the Windows 10 Acrylic effect to Electron applications, by acting as a wrapper for the standard Electron vibrancy feature.
