@@ -6,7 +6,7 @@ import {
 	Vibrancy,
 	VibrancyConfig,
 } from './vibrancy'
-import { isWindows10, isWindows11 } from './os'
+import { isWindows10OrGreater, isWindows11OrGreater } from './os'
 import win10refresh from './win10refresh'
 import { toggleDebugging } from './debug'
 
@@ -100,7 +100,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 		let config = getConfigFromOptions(options?.vibrancy)
 		let opShowOriginal = options?.show ?? true
 
-		if (isWindows10 && config) {
+		if (isWindows10OrGreater && config) {
 			if (config.colors.base)
 				this.setBackgroundColor(rgbToHex(config.colors.base))
 
@@ -128,14 +128,14 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 			if (this.#winconfig.debug) toggleDebugging(this.#winconfig.debug)
 
-			if (config.useCustomWindowRefreshMethod && !isWindows11)
+			if (config.useCustomWindowRefreshMethod && !isWindows11OrGreater)
 				win10refresh(this, config.maximumRefreshRate || 60)
 
 			if (config.disableOnBlur) {
 				this.#winconfig.opacity = 0
 
 				this.on('blur', () => {
-					if (isWindows10 && this.#winconfig) {
+					if (isWindows10OrGreater && this.#winconfig) {
 						this.#winconfig.targetOpacity = 255
 						if (!this.#winconfig.opacityInterval)
 							this.#winconfig.opacityInterval = setInterval(
@@ -185,7 +185,7 @@ export class BrowserWindow extends electron.BrowserWindow {
 				})
 
 				this.on('focus', () => {
-					if (isWindows10 && this.#winconfig) {
+					if (isWindows10OrGreater && this.#winconfig) {
 						this.#winconfig.targetOpacity =
 							this.#winconfig.vibrnacyConfig.colors.a
 						if (!this.#winconfig.opacityInterval)
