@@ -8,7 +8,6 @@ export const isWindows11OrGreater =
 	process.platform === 'win32' &&
 	parseInt(os.release().split('.')[2]) >= 22000
 
-
 export const isRS4OrGreater =
 	isWindows10OrGreater &&
 	!(
