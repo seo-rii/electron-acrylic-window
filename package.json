@@ -1,77 +1,83 @@
 {
-	"name": "electron-acrylic-window",
-	"version": "0.5.11",
-	"description": "Add vibrancy effect for electron",
-	"keywords": [
-		"node",
-		"vibrancy",
-		"napi",
-		"windows",
-		"vibrant",
-		"acrylic",
-		"win10",
-		"windows10",
-		"blur",
-		"fluent",
-		"electron"
-	],
-	"homepage": "https://github.com/Seo-Rii/electron-acrylic-window#readme",
-	"bugs": {
-		"url": "https://github.com/Seo-Rii/electron-acrylic-window/issues",
-		"email": "studioSeoRii@gmail.com"
-	},
-	"repository": "https://github.com/Seo-Rii/electron-acrylic-window",
-	"license": "MIT",
-	"author": "seorii <studioSeoRii@gmail.com>",
-	"main": "dist/index.js",
-	"scripts": {
-		"build": "node-gyp rebuild && tsc",
-		"install": "node-gyp rebuild",
-		"test": "yarn build && yarn --cwd examples/customizable start",
-		"format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
-		"lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
-		"release": "standard-version",
-		"prepare": "husky install",
-		"pre-commit": "lint-staged"
-	},
-	"commitlint": {
-		"extends": [
-			"@commitlint/config-conventional"
-		]
-	},
-	"lint-staged": {
-		"*.{js,jsx,ts,tsx}": "eslint --cache --fix",
-		"*.{js,jsx,ts,tsx,json,md}": "prettier --write"
-	},
-	"dependencies": {
-		"@seorii/win32-displayconfig": "^0.1.1",
-		"bindings": "^1.5.0",
-		"node-addon-api": "^4.2.0",
-		"node-gyp": "^8.4.1"
-	},
-	"devDependencies": {
-		"@commitlint/cli": "^15.0.0",
-		"@commitlint/config-conventional": "^15.0.0",
-		"@electron/remote": "^2.0.1",
-		"@types/node": "^16.11.12",
-		"@typescript-eslint/eslint-plugin": "^5.6.0",
-		"@typescript-eslint/parser": "^5.6.0",
-		"electron": "^16.0.4",
-		"eslint": "^8.4.1",
-		"eslint-config-prettier": "^8.3.0",
-		"eslint-plugin-flowtype": "^8.0.3",
-		"eslint-plugin-import": "^2.25.3",
-		"eslint-plugin-jsx-a11y": "^6.5.1",
-		"husky": "^7.0.4",
-		"lint-staged": "^12.1.2",
-		"prettier": "^2.5.1",
-		"pretty-quick": "^3.1.2",
-		"standard-version": "^9.3.2",
-		"typescript": "^4.5.2",
-		"yarn": "^1.22.17"
-	},
-	"engines": {
-		"node": ">=8.0.0"
-	},
-	"gypfile": true
+  "name": "@superpowered/electron-acrylic-window",
+  "version": "1.0.0",
+  "description": "Add vibrancy effect for electron",
+  "keywords": [
+    "node",
+    "vibrancy",
+    "napi",
+    "windows",
+    "vibrant",
+    "acrylic",
+    "win10",
+    "windows10",
+    "blur",
+    "fluent",
+    "electron"
+  ],
+  "homepage": "https://github.com/Seo-Rii/electron-acrylic-window#readme",
+  "bugs": {
+    "url": "https://github.com/Seo-Rii/electron-acrylic-window/issues",
+    "email": "studioSeoRii@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Seo-Rii/electron-acrylic-window.git"
+  },
+  "license": "MIT",
+  "author": "seorii <studioSeoRii@gmail.com>",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "node-gyp rebuild && tsc",
+    "install": "node-gyp rebuild",
+    "test": "yarn build && yarn --cwd examples/customizable start",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "lint": "eslint . --fix --ext .js,.jsx,.ts,.tsx",
+    "release": "standard-version",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.{js,jsx,ts,tsx,json,md}": "prettier --write"
+  },
+  "dependencies": {
+    "@seorii/win32-displayconfig": "^0.1.1",
+    "bindings": "^1.5.0",
+    "node-addon-api": "^4.2.0",
+    "node-gyp": "^8.4.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
+    "@electron/remote": "^2.0.1",
+    "@types/node": "^16.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "electron": "^16.0.4",
+    "eslint": "^8.4.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.2",
+    "prettier": "^2.5.1",
+    "pretty-quick": "^3.1.2",
+    "standard-version": "^9.3.2",
+    "typescript": "^4.5.2",
+    "yarn": "^1.22.17"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "gypfile": true,
+  "directories": {
+    "example": "examples"
+  }
 }

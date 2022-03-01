@@ -1,14 +1,16 @@
 import * as electron from 'electron'
+
 import {
+	Vibrancy,
+	VibrancyConfig,
 	_setVibrancy,
 	getConfigFromOptions,
 	rgbToHex,
-	Vibrancy,
-	VibrancyConfig,
 } from './vibrancy'
 import { isWindows10OrGreater, isWindows11OrGreater } from './os'
-import win10refresh from './win10refresh'
+
 import { toggleDebugging } from './debug'
+import win10refresh from './win10refresh'
 
 /**
  * Allow modifying default BrowserWindowConstructorOptions
@@ -121,6 +123,8 @@ export class BrowserWindow extends electron.BrowserWindow {
 
 			this.once('ready-to-show', () => {
 				setTimeout(() => {
+					if(this.isDestroyed()) return;
+
 					if (opShowOriginal) this.show()
 					_setVibrancy(this, this.#winconfig.vibrnacyConfig)
 				}, 100)
