@@ -99,7 +99,7 @@ export default function win10refresh(
 		desiredMoveBounds: electron.Rectangle | undefined
 	let boundsPromise: any = Promise.race([
 		getRefreshRateAtCursor(electron.screen.getCursorScreenPoint()).then(
-			(rate: any) => {
+			(rate: number) => {
 				pollingRate = rate || 30
 				doFollowUpQuery = true
 			}
