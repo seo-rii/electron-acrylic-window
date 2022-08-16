@@ -127,6 +127,56 @@ On Windows 10, `[options]` should be a String or an Object.
 
         If true, log will be printed to console.
 
+## Known Issues
+
+* Known issue on Windows 11 - opening web developer tools will disable the acrylic effect.
+
+## Mac Support
+
+For cross-platform projects for Windows and Mac you need to use the default `electron` BrowserWindow for Mac environments. Here's an example of how to do this in TypeScript:
+
+```typescript
+import os from 'os';
+import {
+  BrowserWindow as MacBrowserWindow,
+  BrowserWindowConstructorOptions,
+} from 'electron';
+import {
+  AcrylicBrowserWindowConstructorOptions,
+  BrowserWindow as WindowsBrowserWindow
+} from 'electron-acrylic-window';
+
+const isWindows = os.platform() === 'win32';
+
+let mainWindow: MacBrowserWindow | WindowsBrowserWindow | null = null;
+
+app.on('ready', function () {
+	const params: BrowserWindowConstructorOptions = {
+    	width: 800,
+    	height: 600,
+    	autoHideMenuBar: true,
+		...
+  	};
+	const macParams: BrowserWindowConstructorOptions = {
+		...params,
+		backgroundColor: '#00000000',
+		vibrancy: 'under-window',
+		visualEffectState: 'active'
+	};
+  	const winParams: AcrylicBrowserWindowConstructorOptions = {
+		...params,
+		vibrancy: {
+		effect: 'acrylic'
+		}
+	};
+	mainWindow = isWindows
+    	? new WindowsBrowserWindow(winParams)
+		: new MacBrowserWindow(macParams);
+});
+
+
+```
+
 ## Demo
 
 To run the demo Electron application, clone this repository, install the dependencies and run the test script:
