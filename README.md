@@ -1,3 +1,7 @@
+Thank you so much for your interest in this project. This project is archived because Electron supports acrylic backgrounds as native. If you want, please fork this project to create a new one. Thank you!
+
+---
+
 <p align="center"><img alt="logo" src="./logo.png" width="200"></p>
 
 <h1 align="center">electron-acrylic-window</h1>
