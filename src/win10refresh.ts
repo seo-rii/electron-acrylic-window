@@ -1,4 +1,3 @@
-import { VerticalRefreshRateContext } from '@seorii/win32-displayconfig'
 import { BrowserWindow } from './browserWindow'
 import * as electron from 'electron'
 import process from 'process'
@@ -69,6 +68,8 @@ export default function win10refresh(
 	win: BrowserWindow,
 	maximumRefreshRate: number
 ) {
+	// Used require to only import dependency for windows only environments (supports compiling on mac without errors)
+	const { VerticalRefreshRateContext } = require('@seorii/win32-displayconfig')
 	const refreshCtx = new VerticalRefreshRateContext()
 
 	function getRefreshRateAtCursor(
@@ -98,7 +99,7 @@ export default function win10refresh(
 		desiredMoveBounds: electron.Rectangle | undefined
 	let boundsPromise: any = Promise.race([
 		getRefreshRateAtCursor(electron.screen.getCursorScreenPoint()).then(
-			(rate) => {
+			(rate: number) => {
 				pollingRate = rate || 30
 				doFollowUpQuery = true
 			}
